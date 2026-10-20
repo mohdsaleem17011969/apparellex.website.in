@@ -1,0 +1,7 @@
+{
+  "name": "Apparellex - Ultra-Fast Unique Fashion",
+  "description": "Apparellex delivers trending, hand-picked luxury fashion to your doorstep in 10 minutes. Curated by Shaikh Kamran.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
+
