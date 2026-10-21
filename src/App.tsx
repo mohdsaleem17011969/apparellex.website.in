@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { PRODUCTS, Product, CartItem } from './data/products';
 import { Header } from './components/Header';
 import { Hero } from './components/Hero';
@@ -20,6 +20,25 @@ import { VipDropVault } from './components/VipDropVault';
 import { CommunityReviews } from './components/CommunityReviews';
 import { SizeAssistantModal } from './components/SizeAssistantModal';
 import { ShareModal } from './components/ShareModal';
+import { AdminPanel } from './components/AdminPanel';
+
+const STORAGE_KEY = 'apparellex-products-v1';
+
+const getSavedProducts = (): Product[] => {
+  if (typeof window === 'undefined') return PRODUCTS;
+
+  try {
+    const saved = localStorage.getItem(STORAGE_KEY);
+    if (!saved) return PRODUCTS;
+
+    const parsed = JSON.parse(saved) as Product[];
+    if (!Array.isArray(parsed) || parsed.length === 0) return PRODUCTS;
+
+    return parsed;
+  } catch {
+    return PRODUCTS;
+  }
+};
 
 const INITIAL_PAST_ORDERS: PastOrderRecord[] = [
   {
@@ -97,7 +116,8 @@ const INITIAL_PAST_ORDERS: PastOrderRecord[] = [
 ];
 
 export default function App() {
-  const [products] = useState<Product[]>(PRODUCTS);
+  const [products, setProducts] = useState<Product[]>(getSavedProducts);
+  const [isAdminOpen, setIsAdminOpen] = useState(false);
   const [cart, setCart] = useState<CartItem[]>([]);
   const [wishlist, setWishlist] = useState<string[]>(['prod-1', 'prod-3']);
   const [searchQuery, setSearchQuery] = useState('');
@@ -117,6 +137,12 @@ export default function App() {
   const [isSizeAssistantOpen, setIsSizeAssistantOpen] = useState(false);
   const [sizeAssistantProduct, setSizeAssistantProduct] = useState<Product | null>(null);
 
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(products));
+    }
+  }, [products]);
+
   // Toast feedback state
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
@@ -125,6 +151,26 @@ export default function App() {
     setTimeout(() => {
       setToastMessage(null);
     }, 2800);
+  };
+
+  const handleAddProduct = (newProduct: Product) => {
+    setProducts((prev) => [newProduct, ...prev]);
+    showToast('Product added successfully');
+  };
+
+  const handleUpdateProduct = (id: string, updatedProduct: Product) => {
+    setProducts((prev) => prev.map((item) => (item.id === id ? updatedProduct : item)));
+    showToast('Product updated successfully');
+  };
+
+  const handleDeleteProduct = (id: string) => {
+    setProducts((prev) => prev.filter((item) => item.id !== id));
+    showToast('Product removed');
+  };
+
+  const handleResetProducts = () => {
+    setProducts(PRODUCTS);
+    showToast('Catalog reset to default sample items');
   };
 
   const handleAddOutfitToBag = (
@@ -328,6 +374,24 @@ export default function App() {
         <AboutSection />
       </main>
 
+      {/* Floating Admin Button */}
+      <button
+        onClick={() => setIsAdminOpen((prev) => !prev)}
+        className="fixed bottom-6 left-6 z-40 bg-[#1a1a1a] text-white px-4 py-2 text-[10px] font-bold uppercase tracking-[0.2em] rounded-sm shadow-lg hover:bg-[#FF5757] transition"
+      >
+        {isAdminOpen ? 'Close Admin' : 'Admin'}
+      </button>
+
+      {isAdminOpen && (
+        <AdminPanel
+          products={products}
+          onAddProduct={handleAddProduct}
+          onUpdateProduct={handleUpdateProduct}
+          onDeleteProduct={handleDeleteProduct}
+          onResetDefaultProducts={handleResetProducts}
+        />
+      )}
+
       {/* Footer */}
       <Footer />
 
@@ -378,7 +442,7 @@ export default function App() {
       {activeOrder && !isCheckoutOpen && (
         <aside
           aria-label="Active delivery tracker shortcut"
-          className="fixed bottom-6 left-6 z-40 bg-[#111111] text-white px-4 py-3 rounded-sm shadow-2xl border border-[#FF5757]/40 flex items-center gap-3 backdrop-blur-md cursor-pointer hover:border-[#FF5757] transition hover:scale-102"
+          className="fixed bottom-6 left-6 z-40 bg-[#111111] text-white px-4 py-3 rounded-sm shadow-2xl border border-[#FF5757]/40 flex items-center gap-3 backdrop-blur-md cursor-pointer hover:bg-[#1b1b1b]"
           onClick={() => setIsCheckoutOpen(true)}
         >
           <div className="w-8 h-8 rounded-full bg-[#FF5757] flex items-center justify-center text-white shrink-0">
