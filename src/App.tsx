@@ -23,6 +23,7 @@ import { ShareModal } from './components/ShareModal';
 import { AdminPanel } from './components/AdminPanel';
 
 const STORAGE_KEY = 'apparellex-products-v1';
+const ADMIN_PASSWORD = 'ApparellexOwner2026';
 
 const getSavedProducts = (): Product[] => {
   if (typeof window === 'undefined') return PRODUCTS;
@@ -118,6 +119,7 @@ const INITIAL_PAST_ORDERS: PastOrderRecord[] = [
 export default function App() {
   const [products, setProducts] = useState<Product[]>(getSavedProducts);
   const [isAdminOpen, setIsAdminOpen] = useState(false);
+  const [adminUnlocked, setAdminUnlocked] = useState(false);
   const [cart, setCart] = useState<CartItem[]>([]);
   const [wishlist, setWishlist] = useState<string[]>(['prod-1', 'prod-3']);
   const [searchQuery, setSearchQuery] = useState('');
@@ -151,6 +153,26 @@ export default function App() {
     setTimeout(() => {
       setToastMessage(null);
     }, 2800);
+  };
+
+  const handleAdminButtonClick = () => {
+    if (!adminUnlocked) {
+      const enteredPassword = window.prompt('Enter admin password to access catalog management');
+
+      if (enteredPassword === ADMIN_PASSWORD) {
+        setAdminUnlocked(true);
+        setIsAdminOpen(true);
+        showToast('Admin access unlocked');
+        return;
+      }
+
+      if (enteredPassword !== null) {
+        showToast('Incorrect password');
+      }
+      return;
+    }
+
+    setIsAdminOpen((prev) => !prev);
   };
 
   const handleAddProduct = (newProduct: Product) => {
@@ -376,13 +398,13 @@ export default function App() {
 
       {/* Floating Admin Button */}
       <button
-        onClick={() => setIsAdminOpen((prev) => !prev)}
+        onClick={handleAdminButtonClick}
         className="fixed bottom-6 left-6 z-40 bg-[#1a1a1a] text-white px-4 py-2 text-[10px] font-bold uppercase tracking-[0.2em] rounded-sm shadow-lg hover:bg-[#FF5757] transition"
       >
-        {isAdminOpen ? 'Close Admin' : 'Admin'}
+        {adminUnlocked ? (isAdminOpen ? 'Close Admin' : 'Admin') : 'Admin'}
       </button>
 
-      {isAdminOpen && (
+      {adminUnlocked && isAdminOpen && (
         <AdminPanel
           products={products}
           onAddProduct={handleAddProduct}
