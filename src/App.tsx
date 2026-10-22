@@ -23,7 +23,14 @@ import { ShareModal } from './components/ShareModal';
 import { AdminPanel } from './components/AdminPanel';
 
 const STORAGE_KEY = 'apparellex-products-v1';
-const ADMIN_PASSWORD = 'ApparellexOwner2026';
+const ADMIN_QUERY_KEY = 'admin';
+
+const isAdminRouteRequested = (): boolean => {
+  if (typeof window === 'undefined') return false;
+
+  const params = new URLSearchParams(window.location.search);
+  return params.get(ADMIN_QUERY_KEY) === '1' || window.location.hash === '#admin';
+};
 
 const getSavedProducts = (): Product[] => {
   if (typeof window === 'undefined') return PRODUCTS;
@@ -145,6 +152,13 @@ export default function App() {
     }
   }, [products]);
 
+  useEffect(() => {
+    if (isAdminRouteRequested()) {
+      setAdminUnlocked(true);
+      setIsAdminOpen(true);
+    }
+  }, []);
+
   // Toast feedback state
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
@@ -155,24 +169,37 @@ export default function App() {
     }, 2800);
   };
 
+  const syncAdminRoute = (open: boolean) => {
+    if (typeof window === 'undefined') return;
+
+    const params = new URLSearchParams(window.location.search);
+
+    if (open) {
+      params.set(ADMIN_QUERY_KEY, '1');
+    } else {
+      params.delete(ADMIN_QUERY_KEY);
+    }
+
+    const queryString = params.toString();
+    const nextUrl = `${window.location.pathname}${queryString ? `?${queryString}` : ''}${window.location.hash}`;
+    window.history.replaceState({}, '', nextUrl);
+  };
+
   const handleAdminButtonClick = () => {
-    if (!adminUnlocked) {
-      const enteredPassword = window.prompt('Enter admin password to access catalog management');
+    const shouldOpen = !adminUnlocked || !isAdminOpen;
 
-      if (enteredPassword === ADMIN_PASSWORD) {
-        setAdminUnlocked(true);
-        setIsAdminOpen(true);
-        showToast('Admin access unlocked');
-        return;
-      }
-
-      if (enteredPassword !== null) {
-        showToast('Incorrect password');
-      }
+    if (shouldOpen) {
+      setAdminUnlocked(true);
+      setIsAdminOpen(true);
+      syncAdminRoute(true);
+      showToast('Admin access enabled');
       return;
     }
 
-    setIsAdminOpen((prev) => !prev);
+    setIsAdminOpen(false);
+    setAdminUnlocked(false);
+    syncAdminRoute(false);
+    showToast('Admin closed');
   };
 
   const handleAddProduct = (newProduct: Product) => {
@@ -464,7 +491,7 @@ export default function App() {
       {activeOrder && !isCheckoutOpen && (
         <aside
           aria-label="Active delivery tracker shortcut"
-          className="fixed bottom-6 left-6 z-40 bg-[#111111] text-white px-4 py-3 rounded-sm shadow-2xl border border-[#FF5757]/40 flex items-center gap-3 backdrop-blur-md cursor-pointer hover:bg-[#1b1b1b]"
+          className="fixed bottom-6 left-6 z-40 bg-[#111111] text-white px-4 py-3 rounded-sm shadow-2xl border border-[#FF5757]/40 flex items-center gap-3 backdrop-blur-md cursor-pointer hover:bg-[#1c1c1c] transition"
           onClick={() => setIsCheckoutOpen(true)}
         >
           <div className="w-8 h-8 rounded-full bg-[#FF5757] flex items-center justify-center text-white shrink-0">
