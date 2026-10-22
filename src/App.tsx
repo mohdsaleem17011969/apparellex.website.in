@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { PRODUCTS, Product, CartItem } from './data/products';
 import { Header } from './components/Header';
 import { Hero } from './components/Hero';
@@ -12,7 +12,7 @@ import { DeliveryCheckerModal } from './components/DeliveryCheckerModal';
 import { WishlistModal } from './components/WishlistModal';
 import { AboutSection } from './components/AboutSection';
 import { Footer } from './components/Footer';
-import { CheckCircle2, Zap, Bike } from 'lucide-react';
+import { CheckCircle2, Zap, Bike, ShieldCheck, Sparkles, Truck } from 'lucide-react';
 import { OrderDetails } from './components/OrderTracker';
 import { UserProfileModal, PastOrderRecord } from './components/UserProfileModal';
 import { OutfitBuilder } from './components/OutfitBuilder';
@@ -24,6 +24,10 @@ import { AdminPanel } from './components/AdminPanel';
 
 const STORAGE_KEY = 'apparellex-products-v1';
 const ADMIN_QUERY_KEY = 'admin';
+const MAX_SEARCH_LENGTH = 80;
+
+const sanitizeSearchValue = (value: string): string =>
+  value.replace(/[<>]/g, '').trim().slice(0, MAX_SEARCH_LENGTH);
 
 const isAdminRouteRequested = (): boolean => {
   if (typeof window === 'undefined') return false;
@@ -135,6 +139,9 @@ export default function App() {
   const [activeOrder, setActiveOrder] = useState<OrderDetails | null>(null);
   const [orderHistory, setOrderHistory] = useState<PastOrderRecord[]>(INITIAL_PAST_ORDERS);
 
+  const safeSearchQuery = useMemo(() => sanitizeSearchValue(searchQuery), [searchQuery]);
+  const toastTimeoutRef = useRef<number | null>(null);
+
   // Modals & Drawers state
   const [quickViewProduct, setQuickViewProduct] = useState<Product | null>(null);
   const [isCartOpen, setIsCartOpen] = useState(false);
@@ -148,7 +155,11 @@ export default function App() {
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(products));
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(products));
+      } catch {
+        // Ignore quota/storage issues gracefully.
+      }
     }
   }, [products]);
 
@@ -159,15 +170,47 @@ export default function App() {
     }
   }, []);
 
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key !== 'Escape') return;
+
+      setQuickViewProduct(null);
+      setIsCartOpen(false);
+      setIsCheckoutOpen(false);
+      setIsWishlistOpen(false);
+      setIsProfileOpen(false);
+      setIsShareOpen(false);
+      setIsDeliveryCheckerOpen(false);
+      setIsSizeAssistantOpen(false);
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
+
   // Toast feedback state
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
-  const showToast = (msg: string) => {
-    setToastMessage(msg);
-    setTimeout(() => {
+  const showToast = useCallback((msg: string) => {
+    const safeMessage = sanitizeSearchValue(msg);
+
+    if (toastTimeoutRef.current) {
+      window.clearTimeout(toastTimeoutRef.current);
+    }
+
+    setToastMessage(safeMessage);
+    toastTimeoutRef.current = window.setTimeout(() => {
       setToastMessage(null);
     }, 2800);
-  };
+  }, []);
+
+  useEffect(() => {
+    return () => {
+      if (toastTimeoutRef.current) {
+        window.clearTimeout(toastTimeoutRef.current);
+      }
+    };
+  }, []);
 
   const syncAdminRoute = (open: boolean) => {
     if (typeof window === 'undefined') return;
@@ -348,7 +391,25 @@ export default function App() {
     showToast(`Re-added ${items.length} pieces to your bag`);
   };
 
-  const totalCartItemCount = cart.reduce((sum, item) => sum + item.quantity, 0);
+  const totalCartItemCount = useMemo(
+    () => cart.reduce((sum, item) => sum + item.quantity, 0),
+    [cart]
+  );
+
+  const cartTotal = useMemo(
+    () => cart.reduce((sum, item) => sum + item.quantity * item.product.price, 0),
+    [cart]
+  );
+
+  const currencyFormatter = useMemo(
+    () =>
+      new Intl.NumberFormat('en-US', {
+        style: 'currency',
+        currency: 'USD',
+        maximumFractionDigits: 0,
+      }),
+    []
+  );
 
   return (
     <div className="min-h-screen bg-[#FEFCF5] text-[#1a1a1a] flex flex-col font-sans selection:bg-[#FF5757] selection:text-white">
@@ -372,7 +433,7 @@ export default function App() {
         onOpenWishlist={() => setIsWishlistOpen(true)}
         onOpenProfile={() => setIsProfileOpen(true)}
         onOpenShare={() => setIsShareOpen(true)}
-        searchQuery={searchQuery}
+        searchQuery={safeSearchQuery}
         setSearchQuery={setSearchQuery}
         onSelectCategory={(cat) => {
           setActiveCategory(cat);
@@ -393,6 +454,36 @@ export default function App() {
         {/* Delivery Promise Marquee & Micro-Hub Pillars */}
         <DeliveryMarquee onOpenChecker={() => setIsDeliveryCheckerOpen(true)} />
 
+        <section className="mx-auto max-w-7xl px-4 pb-8 pt-2">
+          <div className="grid gap-3 md:grid-cols-3">
+            {[
+              {
+                icon: ShieldCheck,
+                title: 'Secure checkout',
+                caption: 'Encrypted transactions and protected payment flow.',
+              },
+              {
+                icon: Sparkles,
+                title: 'Smart curation',
+                caption: 'AI-inspired styling suggestions for faster discovery.',
+              },
+              {
+                icon: Truck,
+                title: 'Fast delivery',
+                caption: `Protected dispatch for ${currencyFormatter.format(cartTotal || 0)} total basket value`,
+              },
+            ].map(({ icon: Icon, title, caption }) => (
+              <div key={title} className="feature-card rounded-2xl border border-[#1a1a1a]/10 bg-white/80 p-5 shadow-sm backdrop-blur-sm">
+                <div className="mb-3 flex h-11 w-11 items-center justify-center rounded-full bg-[#FF5757]/10 text-[#FF5757]">
+                  <Icon className="h-5 w-5" />
+                </div>
+                <h3 className="mb-1 text-sm font-black uppercase tracking-[0.18em] text-[#1a1a1a]">{title}</h3>
+                <p className="text-sm text-[#4a4a4a]">{caption}</p>
+              </div>
+            ))}
+          </div>
+        </section>
+
         {/* Categories Section */}
         <Categories onSelectCategory={handleSelectCategoryFromHero} />
 
@@ -403,7 +494,7 @@ export default function App() {
           setActiveCategory={setActiveCategory}
           activeGender={activeGender}
           setActiveGender={setActiveGender}
-          searchQuery={searchQuery}
+          searchQuery={safeSearchQuery}
           wishlist={wishlist}
           onToggleWishlist={handleToggleWishlist}
           onQuickView={(prod) => setQuickViewProduct(prod)}
@@ -491,7 +582,7 @@ export default function App() {
       {activeOrder && !isCheckoutOpen && (
         <aside
           aria-label="Active delivery tracker shortcut"
-          className="fixed bottom-6 left-6 z-40 bg-[#111111] text-white px-4 py-3 rounded-sm shadow-2xl border border-[#FF5757]/40 flex items-center gap-3 backdrop-blur-md cursor-pointer hover:bg-[#1c1c1c] transition"
+          className="fixed bottom-6 left-6 z-40 bg-[#111111] text-white px-4 py-3 rounded-sm shadow-2xl border border-[#FF5757]/40 flex items-center gap-3 backdrop-blur-md cursor-pointer hover:bg-[#1b1b1b] transition"
           onClick={() => setIsCheckoutOpen(true)}
         >
           <div className="w-8 h-8 rounded-full bg-[#FF5757] flex items-center justify-center text-white shrink-0">
