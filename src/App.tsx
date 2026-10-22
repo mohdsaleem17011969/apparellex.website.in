@@ -1,6 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { PRODUCTS, Product, CartItem } from './data/products';
-import { DEFAULT_SITE_SETTINGS, SiteSettings } from './data/siteSettings';
 import { Header } from './components/Header';
 import { Hero } from './components/Hero';
 import { DeliveryMarquee } from './components/DeliveryMarquee';
@@ -22,9 +21,9 @@ import { CommunityReviews } from './components/CommunityReviews';
 import { SizeAssistantModal } from './components/SizeAssistantModal';
 import { ShareModal } from './components/ShareModal';
 import { AdminPanel } from './components/AdminPanel';
+import { AdminRouteGuard } from './components/AdminRouteGuard';
 
 const STORAGE_KEY = 'apparellex-products-v1';
-const SITE_SETTINGS_KEY = 'apparellex-site-settings-v1';
 const ADMIN_QUERY_KEY = 'admin';
 const MAX_SEARCH_LENGTH = 80;
 
@@ -51,27 +50,6 @@ const getSavedProducts = (): Product[] => {
     return parsed;
   } catch {
     return PRODUCTS;
-  }
-};
-
-const getSavedSiteSettings = (): SiteSettings => {
-  if (typeof window === 'undefined') return DEFAULT_SITE_SETTINGS;
-
-  try {
-    const saved = localStorage.getItem(SITE_SETTINGS_KEY);
-    if (!saved) return DEFAULT_SITE_SETTINGS;
-
-    const parsed = JSON.parse(saved) as Partial<SiteSettings>;
-
-    return {
-      ...DEFAULT_SITE_SETTINGS,
-      ...parsed,
-      socialLinks: Array.isArray(parsed.socialLinks) && parsed.socialLinks.length ? parsed.socialLinks : DEFAULT_SITE_SETTINGS.socialLinks,
-      directors: Array.isArray(parsed.directors) && parsed.directors.length ? parsed.directors : DEFAULT_SITE_SETTINGS.directors,
-      employees: Array.isArray(parsed.employees) && parsed.employees.length ? parsed.employees : DEFAULT_SITE_SETTINGS.employees,
-    };
-  } catch {
-    return DEFAULT_SITE_SETTINGS;
   }
 };
 
@@ -150,9 +128,8 @@ const INITIAL_PAST_ORDERS: PastOrderRecord[] = [
   },
 ];
 
-export default function App() {
+function AppContent() {
   const [products, setProducts] = useState<Product[]>(getSavedProducts);
-  const [siteSettings, setSiteSettings] = useState<SiteSettings>(getSavedSiteSettings);
   const [isAdminOpen, setIsAdminOpen] = useState(false);
   const [adminUnlocked, setAdminUnlocked] = useState(false);
   const [cart, setCart] = useState<CartItem[]>([]);
@@ -185,16 +162,6 @@ export default function App() {
       }
     }
   }, [products]);
-
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-      try {
-        localStorage.setItem(SITE_SETTINGS_KEY, JSON.stringify(siteSettings));
-      } catch {
-        // Ignore quota/storage issues gracefully.
-      }
-    }
-  }, [siteSettings]);
 
   useEffect(() => {
     if (isAdminRouteRequested()) {
@@ -295,11 +262,6 @@ export default function App() {
   const handleResetProducts = () => {
     setProducts(PRODUCTS);
     showToast('Catalog reset to default sample items');
-  };
-
-  const handleUpdateSiteSettings = (updated: SiteSettings) => {
-    setSiteSettings(updated);
-    showToast('Website settings saved');
   };
 
   const handleAddOutfitToBag = (
@@ -538,7 +500,7 @@ export default function App() {
 
         <CommunityReviews onNotifyToast={showToast} />
 
-        <AboutSection settings={siteSettings} />
+        <AboutSection />
       </main>
 
       <button
@@ -551,8 +513,6 @@ export default function App() {
       {adminUnlocked && isAdminOpen && (
         <AdminPanel
           products={products}
-          settings={siteSettings}
-          onUpdateSiteSettings={handleUpdateSiteSettings}
           onAddProduct={handleAddProduct}
           onUpdateProduct={handleUpdateProduct}
           onDeleteProduct={handleDeleteProduct}
@@ -560,7 +520,7 @@ export default function App() {
         />
       )}
 
-      <Footer settings={siteSettings} />
+      <Footer />
 
       <CartDrawer
         isOpen={isCartOpen}
@@ -658,5 +618,13 @@ export default function App() {
         onNotifyToast={showToast}
       />
     </div>
+  );
+}
+
+export default function App() {
+  return (
+    <AdminRouteGuard>
+      <AppContent />
+    </AdminRouteGuard>
   );
 }
