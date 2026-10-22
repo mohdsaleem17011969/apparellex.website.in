@@ -1,18 +1,41 @@
 import React, { useState } from 'react';
 import { Sparkles, Zap, ShieldCheck, Mail, Linkedin, Users } from 'lucide-react';
 import { CompanyInfo, Director, INITIAL_COMPANY_INFO, INITIAL_DIRECTORS } from '../data/adminStore';
+import { SiteSettings } from '../data/siteSettings';
 
 interface AboutSectionProps {
   companyInfo?: CompanyInfo;
   directors?: Director[];
+  settings?: SiteSettings;
 }
 
 export const AboutSection: React.FC<AboutSectionProps> = ({
   companyInfo = INITIAL_COMPANY_INFO,
   directors = INITIAL_DIRECTORS,
+  settings,
 }) => {
   const [imgError, setImgError] = useState(false);
-  const founder = directors.find((d) => d.name.toLowerCase().includes('shaikh')) || directors[0];
+
+  const founderName = settings?.founderName || companyInfo.founderAndCeo;
+  const founderRole = settings?.founderRole || `Founder & CEO, ${settings?.companyName || companyInfo.brandName}`;
+  const founderImage = settings?.founderImage || directors[0]?.image || 'https://images.unsplash.com/photo-1523381235312-da5941254381?auto=format&fit=crop&w=800&q=80';
+  const aboutTitle = settings?.aboutTitle || 'REDEFINING THE RETAIL ECOSYSTEM';
+  const aboutIntro = settings?.aboutIntro || `Founded by ${founderName}, ${settings?.companyName || companyInfo.brandName} is a high-octane luxury startup designed for the modern disruptor. We noticed a fundamental flaw in the retail landscape: fashion was either fast and disposable, or premium and agonizingly slow.`;
+  const aboutBody = settings?.aboutBody || companyInfo.missionStatement;
+
+  const displayDirectors: Director[] = settings?.directors
+    ? settings.directors.map((d, i) => ({
+        id: `dir-s-${i}`,
+        name: d.name,
+        role: d.role,
+        department: 'Executive Board',
+        bio: d.bio || 'Directs corporate strategy, curation, and micro-hub logistics.',
+        image: directors[i]?.image || founderImage,
+        email: 'board@apparellex.com',
+        linkedin: 'https://linkedin.com',
+        appointedYear: '2024',
+      }))
+    : directors;
 
   return (
     <section id="about" className="py-24 bg-white border-t border-black/10">
@@ -24,8 +47,8 @@ export const AboutSection: React.FC<AboutSectionProps> = ({
             <div className="relative overflow-hidden rounded-sm shadow-xl bg-stone-100 aspect-[4/5] max-h-[580px]">
               {!imgError ? (
                 <img
-                  src={founder.image}
-                  alt={`${companyInfo.founderAndCeo} - Founder & CEO`}
+                  src={founderImage}
+                  alt={`${founderName} - ${founderRole}`}
                   className="w-full h-full object-cover object-center filter contrast-[1.03]"
                   referrerPolicy="no-referrer"
                   onError={() => setImgError(true)}
@@ -33,9 +56,9 @@ export const AboutSection: React.FC<AboutSectionProps> = ({
               ) : (
                 <div className="w-full h-full bg-gradient-to-br from-stone-900 to-stone-800 flex flex-col items-center justify-center p-8 text-center text-white">
                   <Sparkles className="w-12 h-12 text-[#FF5757] mb-3" />
-                  <h4 className="text-xl font-bold font-fashion">{companyInfo.founderAndCeo}</h4>
+                  <h4 className="text-xl font-bold font-fashion">{founderName}</h4>
                   <p className="text-xs text-stone-400 uppercase tracking-widest mt-1">
-                    Founder & CEO, {companyInfo.brandName}
+                    {founderRole}
                   </p>
                 </div>
               )}
@@ -59,15 +82,15 @@ export const AboutSection: React.FC<AboutSectionProps> = ({
               Our Vision
             </span>
             <h2 className="text-3xl sm:text-4xl md:text-5xl font-black font-fashion mb-6 leading-tight text-[#1a1a1a]">
-              REDEFINING THE RETAIL ECOSYSTEM
+              {aboutTitle}
             </h2>
 
             <p className="text-black/75 text-base md:text-lg leading-relaxed mb-6 font-light">
-              Founded by <strong className="font-bold text-black">{companyInfo.founderAndCeo}</strong>, {companyInfo.brandName} is a high-octane luxury startup designed for the modern disruptor. We noticed a fundamental flaw in the retail landscape: fashion was either fast and disposable, or premium and agonizingly slow.
+              {aboutIntro}
             </p>
 
             <p className="text-black/75 text-sm md:text-base leading-relaxed mb-8 font-light">
-              {companyInfo.missionStatement}
+              {aboutBody}
             </p>
 
             {/* Adjacency Proof Numbers */}
@@ -100,12 +123,12 @@ export const AboutSection: React.FC<AboutSectionProps> = ({
 
             {/* Founder Signature Block */}
             <div>
-              <h3 className="font-bold text-xl text-[#1a1a1a] font-fashion">{companyInfo.founderAndCeo}</h3>
+              <h3 className="font-bold text-xl text-[#1a1a1a] font-fashion">{founderName}</h3>
               <p className="text-xs uppercase tracking-widest text-black/50 font-semibold">
-                Founder & Chief Executive Officer, {companyInfo.brandName}
+                {founderRole}
               </p>
               <p className="text-[11px] text-black/40 mt-1">
-                {companyInfo.legalName} · {companyInfo.registrationNumber}
+                {settings?.companyName || companyInfo.legalName}
               </p>
             </div>
           </div>
@@ -123,12 +146,12 @@ export const AboutSection: React.FC<AboutSectionProps> = ({
               </h3>
             </div>
             <p className="text-xs text-black/50 max-w-md font-light">
-              Governed under {companyInfo.legalName}. Engineered by leaders across runway haute couture, autonomous dark-store logistics, and electric fleet telemetry.
+              Governed under {settings?.companyName || companyInfo.legalName}. Engineered by leaders across runway haute couture, autonomous dark-store logistics, and electric fleet telemetry.
             </p>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {directors.map((d) => (
+            {displayDirectors.map((d) => (
               <div
                 key={d.id}
                 className="bg-[#FAF8F2] p-5 rounded-sm border border-black/10 flex flex-col justify-between group hover:border-black transition"
@@ -183,6 +206,39 @@ export const AboutSection: React.FC<AboutSectionProps> = ({
             ))}
           </div>
         </div>
+
+        {/* Key Department Leads & Team Members */}
+        {settings?.employees && settings.employees.length > 0 && (
+          <div className="pt-12 border-t border-black/10 space-y-8">
+            <div>
+              <span className="text-xs uppercase tracking-[0.3em] text-[#FF5757] font-bold block mb-2">
+                Core Operations & Creative Division
+              </span>
+              <h3 className="text-2xl sm:text-3xl font-black font-fashion uppercase text-[#1a1a1a]">
+                Department Leads & Key Specialists
+              </h3>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              {settings.employees.map((emp, i) => (
+                <div key={i} className="bg-[#FAF8F2] p-4 rounded-sm border border-black/10 flex items-center gap-4">
+                  {emp.image ? (
+                    <img src={emp.image} alt={emp.name} className="w-16 h-16 rounded-full object-cover shrink-0" />
+                  ) : (
+                    <div className="w-16 h-16 rounded-full bg-stone-300 flex items-center justify-center font-bold text-sm shrink-0">
+                      {emp.name.slice(0, 2).toUpperCase()}
+                    </div>
+                  )}
+                  <div>
+                    <h4 className="text-base font-bold text-black font-fashion">{emp.name}</h4>
+                    <p className="text-xs text-[#FF5757] font-semibold">{emp.role}</p>
+                    <p className="text-[11px] text-black/50 mt-1">10-Minute Dark-Store Dispatch Division</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
     </section>
   );

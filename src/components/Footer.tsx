@@ -1,18 +1,26 @@
 import React, { useState } from 'react';
 import { ArrowRight, CheckCircle2, Mail, Phone, MapPin, ShieldCheck, Globe } from 'lucide-react';
 import { CompanyInfo, SocialLinks, INITIAL_COMPANY_INFO, INITIAL_SOCIAL_LINKS } from '../data/adminStore';
+import { SiteSettings } from '../data/siteSettings';
 
 interface FooterProps {
   companyInfo?: CompanyInfo;
   socialLinks?: SocialLinks;
+  settings?: SiteSettings;
 }
 
 export const Footer: React.FC<FooterProps> = ({
   companyInfo = INITIAL_COMPANY_INFO,
   socialLinks = INITIAL_SOCIAL_LINKS,
+  settings,
 }) => {
   const [email, setEmail] = useState('');
   const [subscribed, setSubscribed] = useState(false);
+
+  const brandName = settings?.companyName || companyInfo.brandName;
+  const missionStatement = settings?.aboutIntro || companyInfo.missionStatement;
+  const founderAndCeo = settings?.founderName || companyInfo.founderAndCeo;
+  const supportEmail = settings?.email || companyInfo.supportEmail;
 
   const handleSubscribe = (e: React.FormEvent) => {
     e.preventDefault();
@@ -23,7 +31,7 @@ export const Footer: React.FC<FooterProps> = ({
 
   const whatsappShareUrl = `https://api.whatsapp.com/send?text=${encodeURIComponent(
     socialLinks.whatsapp.message ||
-      `Check out ${companyInfo.brandName} — 10-minute luxury fashion delivered to your doorstep! https://ais-pre-nymurarspls3yqnu5ugsbj-563741178923.asia-southeast1.run.app`
+      `Check out ${brandName} — 10-minute luxury fashion delivered to your doorstep! https://ais-pre-nymurarspls3yqnu5ugsbj-563741178923.asia-southeast1.run.app`
   )}`;
 
   return (
@@ -33,10 +41,10 @@ export const Footer: React.FC<FooterProps> = ({
           {/* Brand & Corporate Details Column */}
           <div className="md:col-span-2 space-y-4">
             <h4 className="text-3xl sm:text-4xl font-black font-fashion tracking-tighter text-white">
-              {companyInfo.brandName}
+              {brandName}
             </h4>
             <p className="text-white/60 text-xs sm:text-sm max-w-md leading-relaxed font-light">
-              {companyInfo.missionStatement}
+              {missionStatement}
             </p>
 
             <div className="text-[11px] text-white/50 space-y-1.5 pt-1">
@@ -162,11 +170,11 @@ export const Footer: React.FC<FooterProps> = ({
               )}
               <li>
                 <a
-                  href={`mailto:${companyInfo.supportEmail}`}
+                  href={`mailto:${supportEmail}`}
                   className="hover:text-[#FF5757] transition-colors inline-flex items-center gap-1.5 pt-1"
                 >
                   <Mail className="w-3 h-3 text-[#FF5757]" />
-                  <span>{companyInfo.supportEmail}</span>
+                  <span>{supportEmail}</span>
                 </a>
               </li>
             </ul>
@@ -200,10 +208,10 @@ export const Footer: React.FC<FooterProps> = ({
               </li>
               <li>
                 <a
-                  href={`mailto:${companyInfo.founderEmail}`}
+                  href={`mailto:${supportEmail}`}
                   className="hover:text-[#FF5757] transition-colors text-white/80 font-bold"
                 >
-                  Founder Desk ({companyInfo.founderAndCeo})
+                  Founder Desk ({founderAndCeo})
                 </a>
               </li>
             </ul>
@@ -213,7 +221,7 @@ export const Footer: React.FC<FooterProps> = ({
         {/* Bottom Attribution */}
         <div className="pt-8 flex flex-col sm:flex-row items-center justify-between text-white/40 text-xs gap-4">
           <p>
-            © {companyInfo.yearFounded} {companyInfo.brandName}. All Rights Reserved. Founder & CEO: {companyInfo.founderAndCeo}.
+            © {companyInfo.yearFounded} {brandName}. All Rights Reserved. Founder & CEO: {founderAndCeo}.
           </p>
           <div className="flex items-center gap-4 text-[11px]">
             <span>10-Minute Micro-Hub Network</span>
