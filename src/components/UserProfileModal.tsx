@@ -15,7 +15,8 @@ import {
   ShieldCheck,
   CreditCard,
   ShoppingBag,
-  Sparkles
+  Sparkles,
+  Star
 } from 'lucide-react';
 import { CartItem } from '../data/products';
 
@@ -32,6 +33,7 @@ interface UserProfileModalProps {
   orders: PastOrderRecord[];
   onTrackOrder: (order: OrderDetails) => void;
   onReorder: (items: CartItem[]) => void;
+  onOpenFeedback?: (order: OrderDetails) => void;
 }
 
 export const UserProfileModal: React.FC<UserProfileModalProps> = ({
@@ -40,6 +42,7 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
   orders,
   onTrackOrder,
   onReorder,
+  onOpenFeedback,
 }) => {
   if (!isOpen) return null;
 
@@ -322,6 +325,20 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
 
                           {/* Action Buttons */}
                           <div className="flex items-center gap-2.5">
+                            {onOpenFeedback && (orderRecord.statusType === 'delivered' || orderRecord.statusType === 'try_on_kept') && (
+                              <button
+                                onClick={() => {
+                                  onOpenFeedback(orderRecord);
+                                  onClose();
+                                }}
+                                className="px-3 py-2 bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-200 rounded-sm text-xs font-bold uppercase tracking-wider flex items-center gap-1.5 transition cursor-pointer"
+                                title="Rate 10-minute delivery speed and product quality"
+                              >
+                                <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-500" />
+                                <span>Rate Drop</span>
+                              </button>
+                            )}
+
                             <button
                               onClick={() => {
                                 onTrackOrder(orderRecord);

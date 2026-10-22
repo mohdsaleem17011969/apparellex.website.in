@@ -14,7 +14,8 @@ import {
   Sparkles,
   ArrowRight,
   Play,
-  RotateCcw
+  RotateCcw,
+  Star
 } from 'lucide-react';
 
 export interface OrderDetails {
@@ -33,6 +34,7 @@ interface OrderTrackerProps {
   order: OrderDetails;
   onClose: () => void;
   onReturnToShop: () => void;
+  onOpenFeedback?: (order: OrderDetails) => void;
 }
 
 export type TrackingStage = 'received' | 'preparing' | 'out_for_delivery' | 'arrived';
@@ -80,11 +82,13 @@ export const OrderTracker: React.FC<OrderTrackerProps> = ({
   order,
   onClose,
   onReturnToShop,
+  onOpenFeedback,
 }) => {
   // 10-minute countdown in seconds (600 seconds total)
   const [secondsRemaining, setSecondsRemaining] = useState(600);
   const [isSimulatingFast, setIsSimulatingFast] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
+  const [hasPromptedFeedback, setHasPromptedFeedback] = useState(false);
 
   // Compute stage index (0 to 3) based on seconds remaining
   // Total 600s:
@@ -109,6 +113,19 @@ export const OrderTracker: React.FC<OrderTrackerProps> = ({
 
     return () => clearInterval(interval);
   }, [secondsRemaining, isPaused, isSimulatingFast]);
+
+  // Prompt feedback survey automatically when order arrives at stage 3 / delivered
+  useEffect(() => {
+    if (currentStageIndex === 3 && !hasPromptedFeedback) {
+      const timer = setTimeout(() => {
+        setHasPromptedFeedback(true);
+        if (onOpenFeedback) {
+          onOpenFeedback(order);
+        }
+      }, 1200);
+      return () => clearTimeout(timer);
+    }
+  }, [currentStageIndex, hasPromptedFeedback, onOpenFeedback, order]);
 
   // Percentage for the continuous progress bar:
   // 0% at stage 0 start, smoothly up to 100% at stage 3
@@ -179,6 +196,38 @@ export const OrderTracker: React.FC<OrderTrackerProps> = ({
           </span>
         </div>
       </div>
+
+      {/* Post-Delivery Rate & Feedback Callout Banner when Arrived */}
+      {currentStageIndex === 3 && (
+        <div className="bg-gradient-to-r from-[#111111] via-[#1c1c1c] to-[#111111] border border-[#FF5757]/40 text-white p-5 rounded-sm flex flex-col sm:flex-row items-center justify-between gap-4 shadow-lg animate-fadeIn">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-full bg-[#FF5757] text-white flex items-center justify-center shrink-0">
+              <Star className="w-5 h-5 fill-white" />
+            </div>
+            <div>
+              <div className="flex items-center gap-2">
+                <span className="text-[10px] font-black uppercase tracking-widest text-[#FF5757]">
+                  Order Delivered
+                </span>
+                <span className="text-white/40">·</span>
+                <span className="text-[11px] text-emerald-400 font-bold">10-Min SLA Met</span>
+              </div>
+              <h4 className="text-sm font-bold text-white">How was your 10-minute delivery & garment fit?</h4>
+              <p className="text-xs text-white/60 font-light">
+                Rate our delivery speed and the craftsmanship of your pieces.
+              </p>
+            </div>
+          </div>
+          <button
+            type="button"
+            onClick={() => onOpenFeedback?.(order)}
+            className="w-full sm:w-auto bg-[#FF5757] hover:bg-white hover:text-black text-white px-5 py-2.5 rounded-sm text-xs font-black uppercase tracking-wider transition cursor-pointer flex items-center justify-center gap-1.5 shadow shrink-0"
+          >
+            <Star className="w-3.5 h-3.5 fill-current" />
+            <span>Rate Delivery & Quality</span>
+          </button>
+        </div>
+      )}
 
       {/* Real-Time Progress Bar & Milestones Section */}
       <div className="bg-[#FAF8F2] border border-black/10 p-6 md:p-8 rounded-sm">

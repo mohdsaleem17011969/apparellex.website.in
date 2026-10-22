@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { CartItem } from '../data/products';
-import { X, Clock, Zap, User, Phone, Home, CreditCard, Banknote } from 'lucide-react';
+import { X, Clock, Zap, User, Phone, Home, CreditCard, Banknote, AlertCircle } from 'lucide-react';
 import { OrderTracker, OrderDetails } from './OrderTracker';
+import { ConfettiCanvas } from './ConfettiCanvas';
 
 interface CheckoutModalProps {
   isOpen: boolean;
@@ -9,6 +10,7 @@ interface CheckoutModalProps {
   items: CartItem[];
   onOrderComplete: (order: OrderDetails) => void;
   existingOrder?: OrderDetails | null;
+  onOpenFeedback?: (order: OrderDetails) => void;
 }
 
 export const CheckoutModal: React.FC<CheckoutModalProps> = ({
@@ -17,6 +19,7 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
   items,
   onOrderComplete,
   existingOrder,
+  onOpenFeedback,
 }) => {
   if (!isOpen) return null;
 
@@ -27,7 +30,8 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
   const [postalCode, setPostalCode] = useState('10001');
   const [paymentMethod, setPaymentMethod] = useState<'cod' | 'card' | 'upi'>('cod');
   const [confirmedOrder, setConfirmedOrder] = useState<OrderDetails | null>(existingOrder || null);
-
+  const [showConfetti, setShowConfetti] = useState(false);
+  const [formError, setFormError] = useState<string | null>(null);
 
   const subtotal = items.reduce((sum, item) => sum + item.product.price * item.quantity, 0);
   const deliveryFee = subtotal >= 100 || items.length === 0 ? 0 : 7;
@@ -35,8 +39,9 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
 
   const handleSubmitOrder = (e: React.FormEvent) => {
     e.preventDefault();
+    setFormError(null);
     if (!name.trim() || !phone.trim() || !address.trim()) {
-      alert('Please fill in your delivery name, phone, and address.');
+      setFormError('Please fill in your delivery name, phone number, and address.');
       return;
     }
 
@@ -54,6 +59,7 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
 
     setConfirmedOrder(orderData);
     setStep('tracking');
+    setShowConfetti(true);
     onOrderComplete(orderData);
   };
 
@@ -71,6 +77,13 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
         }`}
         onClick={(e) => e.stopPropagation()}
       >
+        {/* Subtle Confetti Animation Effect */}
+        <ConfettiCanvas
+          active={showConfetti}
+          onComplete={() => setShowConfetti(false)}
+          durationMs={3800}
+        />
+
         {/* Header */}
         <div className="p-5 sm:p-6 border-b border-black/10 flex items-center justify-between bg-[#111111] text-white">
           <div className="flex items-center gap-2">
@@ -80,6 +93,11 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
                 ? 'Apparellex 10-Minute Express Checkout'
                 : 'Live Order Radar & Dispatch Tracker'}
             </h2>
+            {showConfetti && (
+              <span className="hidden sm:inline-flex items-center gap-1 text-[11px] font-bold text-[#E5B869] bg-white/10 px-2.5 py-0.5 rounded-full border border-[#E5B869]/30 animate-pulse">
+                ✨ Order Dispatched!
+              </span>
+            )}
           </div>
           <button
             onClick={onClose}
@@ -94,6 +112,14 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
         <div className="p-5 sm:p-8 overflow-y-auto flex-1">
           {step === 'details' ? (
             <form onSubmit={handleSubmitOrder} className="space-y-6">
+              {/* Form Validation Error Banner */}
+              {formError && (
+                <div className="bg-red-50 border border-red-200 text-red-700 p-3 rounded-sm text-xs flex items-center gap-2">
+                  <AlertCircle className="w-4 h-4 text-red-600 shrink-0" />
+                  <span>{formError}</span>
+                </div>
+              )}
+
               {/* Order Mini Summary */}
               <div className="bg-[#FAF8F2] p-4 rounded-sm border border-black/10 flex items-center justify-between text-xs">
                 <div>
@@ -259,6 +285,7 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
                   if (confirmedOrder) onOrderComplete(confirmedOrder);
                   onClose();
                 }}
+                onOpenFeedback={onOpenFeedback}
               />
             )
           )}

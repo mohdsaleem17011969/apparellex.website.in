@@ -1,5 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { ShoppingBag, Search, Heart, X, Zap, User, Share2 } from 'lucide-react';
+import { Product, PRODUCTS } from '../data/products';
+import { TrendingSearchesDropdown } from './TrendingSearchesDropdown';
 
 interface HeaderProps {
   cartCount: number;
@@ -12,6 +14,8 @@ interface HeaderProps {
   setSearchQuery: (query: string) => void;
   onSelectCategory: (category: 'all' | 'urban-street' | 'minimalist-zen' | 'unique-trends') => void;
   onOpenDeliveryChecker: () => void;
+  products?: Product[];
+  onQuickView?: (product: Product) => void;
 }
 
 export const Header: React.FC<HeaderProps> = ({
@@ -25,9 +29,35 @@ export const Header: React.FC<HeaderProps> = ({
   setSearchQuery,
   onSelectCategory,
   onOpenDeliveryChecker,
+  products,
+  onQuickView,
 }) => {
   const [showSearch, setShowSearch] = useState(false);
   const [showBanner, setShowBanner] = useState(true);
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const searchContainerRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    const handlePointerDown = (e: MouseEvent) => {
+      if (
+        searchContainerRef.current &&
+        !searchContainerRef.current.contains(e.target as Node)
+      ) {
+        setIsDropdownOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handlePointerDown);
+    return () => document.removeEventListener('mousedown', handlePointerDown);
+  }, []);
+
+  const handleToggleSearch = () => {
+    setShowSearch((prev) => {
+      const next = !prev;
+      setIsDropdownOpen(next);
+      return next;
+    });
+  };
 
   return (
     <>
@@ -111,7 +141,7 @@ export const Header: React.FC<HeaderProps> = ({
           <div className="flex items-center space-x-2 sm:space-x-3 md:space-x-4">
             {/* Search Trigger */}
             <button
-              onClick={() => setShowSearch(!showSearch)}
+              onClick={handleToggleSearch}
               className="p-2 text-[#1a1a1a] hover:text-[#FF5757] transition-colors rounded-full hover:bg-black/5 cursor-pointer"
               aria-label="Search items"
               title="Search Catalog"
@@ -171,35 +201,85 @@ export const Header: React.FC<HeaderProps> = ({
           </div>
         </nav>
 
-        {/* Expandable Search Input Bar */}
+        {/* Expandable Search Input Bar with Trending Searches Dropdown */}
         {showSearch && (
-          <div className="border-t border-black/10 bg-white/95 px-6 py-3 shadow-inner">
+          <div
+            ref={searchContainerRef}
+            className="border-t border-black/10 bg-white px-6 py-3 shadow-inner relative"
+          >
             <div className="container mx-auto flex items-center gap-3">
               <Search className="w-4 h-4 text-black/40" />
               <input
                 type="text"
                 value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
+                onFocus={() => setIsDropdownOpen(true)}
+                onChange={(e) => {
+                  setSearchQuery(e.target.value);
+                  setIsDropdownOpen(true);
+                }}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    setIsDropdownOpen(false);
+                    const catalogEl = document.getElementById('catalog');
+                    if (catalogEl) catalogEl.scrollIntoView({ behavior: 'smooth' });
+                  } else if (e.key === 'Escape') {
+                    setIsDropdownOpen(false);
+                    setShowSearch(false);
+                  }
+                }}
                 placeholder="Search oversize hoodies, tailored poplin, runway coats..."
                 className="w-full text-sm outline-none bg-transparent text-black placeholder:text-black/40 font-light"
                 autoFocus
               />
               {searchQuery && (
                 <button
-                  onClick={() => setSearchQuery('')}
-                  className="text-xs font-semibold text-black/50 hover:text-black uppercase"
+                  type="button"
+                  onClick={() => {
+                    setSearchQuery('');
+                    setIsDropdownOpen(true);
+                  }}
+                  className="text-xs font-semibold text-black/50 hover:text-black uppercase cursor-pointer"
                 >
                   Clear
                 </button>
               )}
               <button
-                onClick={() => setShowSearch(false)}
-                className="text-black/60 hover:text-black p-1"
+                type="button"
+                onClick={() => {
+                  setShowSearch(false);
+                  setIsDropdownOpen(false);
+                }}
+                className="text-black/60 hover:text-black p-1 cursor-pointer"
                 aria-label="Close search"
               >
                 <X className="w-4 h-4" />
               </button>
             </div>
+
+            {/* Real-time Trending Searches Dropdown */}
+            <TrendingSearchesDropdown
+              isOpen={isDropdownOpen}
+              searchQuery={searchQuery}
+              onSelectQuery={(q) => {
+                setSearchQuery(q);
+                setIsDropdownOpen(false);
+              }}
+              onSelectCategory={(cat) => {
+                onSelectCategory(cat);
+                setIsDropdownOpen(false);
+                setShowSearch(false);
+              }}
+              onSelectProduct={(prod) => {
+                if (onQuickView) {
+                  onQuickView(prod);
+                } else {
+                  setSearchQuery(prod.name);
+                }
+                setIsDropdownOpen(false);
+              }}
+              products={products || PRODUCTS}
+              onClose={() => setIsDropdownOpen(false)}
+            />
           </div>
         )}
       </header>
