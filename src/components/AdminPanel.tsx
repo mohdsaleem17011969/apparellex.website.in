@@ -9,6 +9,18 @@ interface AdminPanelProps {
   onResetDefaultProducts: () => void;
 }
 
+const getCategoryLabel = (category: Product['category']): string => {
+  switch (category) {
+    case 'minimalist-zen':
+      return 'Minimalist Zen';
+    case 'unique-trends':
+      return 'Unique Trends';
+    case 'urban-street':
+    default:
+      return 'Urban Street';
+  }
+};
+
 const defaultProduct = (): Product => ({
   id: `prod-${Date.now()}`,
   name: 'New Product',
@@ -49,6 +61,39 @@ const parseColors = (value: string): { name: string; hex: string }[] =>
       };
     });
 
+const normalizeProductForm = (product: Product): Product => {
+  const nextCategory = product.category || 'urban-street';
+  const nextCategoryLabel = (product.categoryLabel || '').trim() || getCategoryLabel(nextCategory);
+
+  return {
+    ...product,
+    id: String(product.id || '').trim() || `prod-${Date.now()}`,
+    name: String(product.name || '').trim() || 'Untitled Product',
+    category: nextCategory,
+    categoryLabel: nextCategoryLabel,
+    gender: product.gender || 'unisex',
+    price: Number(product.price) || 0,
+    originalPrice: Number(product.originalPrice ?? product.price) || 0,
+    rating: Number(product.rating) || 0,
+    reviewsCount: Number(product.reviewsCount) || 0,
+    estDeliveryMins: Number(product.estDeliveryMins) || 0,
+    image: String(product.image || '').trim() || defaultProduct().image,
+    description: String(product.description || '').trim() || 'No description provided',
+    fabric: String(product.fabric || '').trim() || 'Cotton blend',
+    fit: String(product.fit || '').trim() || 'Regular fit',
+    sizes: Array.isArray(product.sizes) && product.sizes.length ? product.sizes.map((size) => String(size).trim()).filter(Boolean) : ['S', 'M', 'L', 'XL'],
+    colors:
+      Array.isArray(product.colors) && product.colors.length
+        ? product.colors.map((color) => ({
+            name: String(color?.name || '').trim() || 'Color',
+            hex: String(color?.hex || '').trim() || '#111111',
+          }))
+        : [{ name: 'Black', hex: '#111111' }],
+    tag: product.tag?.trim() || undefined,
+    isNewDrop: Boolean(product.isNewDrop),
+  };
+};
+
 export const AdminPanel: React.FC<AdminPanelProps> = ({
   products,
   onAddProduct,
@@ -70,15 +115,19 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
     setForm((prev) => ({ ...prev, [field]: value }));
   };
 
+  const handleCategoryChange = (nextCategory: Product['category']) => {
+    setForm((prev) => ({
+      ...prev,
+      category: nextCategory,
+      categoryLabel:
+        prev.categoryLabel && prev.categoryLabel.trim() && prev.categoryLabel !== getCategoryLabel(prev.category)
+          ? prev.categoryLabel
+          : getCategoryLabel(nextCategory),
+    }));
+  };
+
   const handleAddOrUpdate = () => {
-    const safeForm = {
-      ...form,
-      id: form.id || `prod-${Date.now()}`,
-      name: form.name.trim() || 'Untitled Product',
-      categoryLabel: form.categoryLabel || form.category,
-      sizes: form.sizes.length ? form.sizes : ['S', 'M', 'L', 'XL'],
-      colors: form.colors.length ? form.colors : [{ name: 'Black', hex: '#111111' }],
-    };
+    const safeForm = normalizeProductForm(form);
 
     if (editingId) {
       onUpdateProduct(editingId, safeForm);
@@ -91,7 +140,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
 
   const handleEdit = (product: Product) => {
     setEditingId(product.id);
-    setForm(product);
+    setForm({ ...product, categoryLabel: product.categoryLabel || getCategoryLabel(product.category) });
   };
 
   return (
@@ -143,8 +192,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                   value={form.category}
                   onChange={(e) => {
                     const value = e.target.value as Product['category'];
-                    handleChange('category', value);
-                    handleChange('categoryLabel', value === 'urban-street' ? 'Urban Street' : value === 'minimalist-zen' ? 'Minimalist Zen' : 'Unique Trends');
+                    handleCategoryChange(value);
                   }}
                   className="mt-1 w-full border border-black/15 bg-white px-3 py-2 text-sm outline-none focus:border-[#FF5757]"
                 >
@@ -152,6 +200,15 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                   <option value="minimalist-zen">Minimalist Zen</option>
                   <option value="unique-trends">Unique Trends</option>
                 </select>
+              </label>
+
+              <label className="text-xs font-semibold text-black/70">
+                Category Label
+                <input
+                  value={form.categoryLabel || ''}
+                  onChange={(e) => handleChange('categoryLabel', e.target.value)}
+                  className="mt-1 w-full border border-black/15 bg-white px-3 py-2 text-sm outline-none focus:border-[#FF5757]"
+                />
               </label>
 
               <label className="text-xs font-semibold text-black/70">
