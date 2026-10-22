@@ -1,5 +1,6 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { PRODUCTS, Product, CartItem } from './data/products';
+import { DEFAULT_SITE_SETTINGS, SiteSettings } from './data/siteSettings';
 import { Header } from './components/Header';
 import { Hero } from './components/Hero';
 import { DeliveryMarquee } from './components/DeliveryMarquee';
@@ -23,6 +24,7 @@ import { ShareModal } from './components/ShareModal';
 import { AdminPanel } from './components/AdminPanel';
 
 const STORAGE_KEY = 'apparellex-products-v1';
+const SITE_SETTINGS_KEY = 'apparellex-site-settings-v1';
 const ADMIN_QUERY_KEY = 'admin';
 const MAX_SEARCH_LENGTH = 80;
 
@@ -49,6 +51,27 @@ const getSavedProducts = (): Product[] => {
     return parsed;
   } catch {
     return PRODUCTS;
+  }
+};
+
+const getSavedSiteSettings = (): SiteSettings => {
+  if (typeof window === 'undefined') return DEFAULT_SITE_SETTINGS;
+
+  try {
+    const saved = localStorage.getItem(SITE_SETTINGS_KEY);
+    if (!saved) return DEFAULT_SITE_SETTINGS;
+
+    const parsed = JSON.parse(saved) as Partial<SiteSettings>;
+
+    return {
+      ...DEFAULT_SITE_SETTINGS,
+      ...parsed,
+      socialLinks: Array.isArray(parsed.socialLinks) && parsed.socialLinks.length ? parsed.socialLinks : DEFAULT_SITE_SETTINGS.socialLinks,
+      directors: Array.isArray(parsed.directors) && parsed.directors.length ? parsed.directors : DEFAULT_SITE_SETTINGS.directors,
+      employees: Array.isArray(parsed.employees) && parsed.employees.length ? parsed.employees : DEFAULT_SITE_SETTINGS.employees,
+    };
+  } catch {
+    return DEFAULT_SITE_SETTINGS;
   }
 };
 
@@ -129,6 +152,7 @@ const INITIAL_PAST_ORDERS: PastOrderRecord[] = [
 
 export default function App() {
   const [products, setProducts] = useState<Product[]>(getSavedProducts);
+  const [siteSettings, setSiteSettings] = useState<SiteSettings>(getSavedSiteSettings);
   const [isAdminOpen, setIsAdminOpen] = useState(false);
   const [adminUnlocked, setAdminUnlocked] = useState(false);
   const [cart, setCart] = useState<CartItem[]>([]);
@@ -142,7 +166,6 @@ export default function App() {
   const safeSearchQuery = useMemo(() => sanitizeSearchValue(searchQuery), [searchQuery]);
   const toastTimeoutRef = useRef<number | null>(null);
 
-  // Modals & Drawers state
   const [quickViewProduct, setQuickViewProduct] = useState<Product | null>(null);
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
@@ -162,6 +185,16 @@ export default function App() {
       }
     }
   }, [products]);
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      try {
+        localStorage.setItem(SITE_SETTINGS_KEY, JSON.stringify(siteSettings));
+      } catch {
+        // Ignore quota/storage issues gracefully.
+      }
+    }
+  }, [siteSettings]);
 
   useEffect(() => {
     if (isAdminRouteRequested()) {
@@ -188,7 +221,6 @@ export default function App() {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, []);
 
-  // Toast feedback state
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
   const showToast = useCallback((msg: string) => {
@@ -263,6 +295,11 @@ export default function App() {
   const handleResetProducts = () => {
     setProducts(PRODUCTS);
     showToast('Catalog reset to default sample items');
+  };
+
+  const handleUpdateSiteSettings = (updated: SiteSettings) => {
+    setSiteSettings(updated);
+    showToast('Website settings saved');
   };
 
   const handleAddOutfitToBag = (
@@ -413,7 +450,6 @@ export default function App() {
 
   return (
     <div className="min-h-screen bg-[#FEFCF5] text-[#1a1a1a] flex flex-col font-sans selection:bg-[#FF5757] selection:text-white">
-      {/* Toast Notification */}
       {toastMessage && (
         <div
           role="status"
@@ -425,7 +461,6 @@ export default function App() {
         </div>
       )}
 
-      {/* Header & Sticky Top Bar */}
       <Header
         cartCount={totalCartItemCount}
         wishlistCount={wishlist.length}
@@ -444,14 +479,12 @@ export default function App() {
       />
 
       <main className="flex-1">
-        {/* Hero Section */}
         <Hero
           onShopMen={handleShopMen}
           onShopWomen={handleShopWomen}
           onOpenDeliveryChecker={() => setIsDeliveryCheckerOpen(true)}
         />
 
-        {/* Delivery Promise Marquee & Micro-Hub Pillars */}
         <DeliveryMarquee onOpenChecker={() => setIsDeliveryCheckerOpen(true)} />
 
         <section className="mx-auto max-w-7xl px-4 pb-8 pt-2">
@@ -484,10 +517,8 @@ export default function App() {
           </div>
         </section>
 
-        {/* Categories Section */}
         <Categories onSelectCategory={handleSelectCategoryFromHero} />
 
-        {/* Interactive Curated Drops Catalog */}
         <ProductCatalog
           products={products}
           activeCategory={activeCategory}
@@ -501,20 +532,15 @@ export default function App() {
           onAddToCart={handleAddToCart}
         />
 
-        {/* Mix & Match Outfit Studio */}
         <OutfitBuilder onAddOutfitToBag={handleAddOutfitToBag} />
 
-        {/* VIP Secret Drop Vault */}
         <VipDropVault onNotifyToast={showToast} />
 
-        {/* Street Cred & Verified 10-Minute Reviews */}
         <CommunityReviews onNotifyToast={showToast} />
 
-        {/* About Us & Shaikh Kamran Narrative */}
-        <AboutSection />
+        <AboutSection settings={siteSettings} />
       </main>
 
-      {/* Floating Admin Button */}
       <button
         onClick={handleAdminButtonClick}
         className="fixed bottom-6 left-6 z-40 bg-[#1a1a1a] text-white px-4 py-2 text-[10px] font-bold uppercase tracking-[0.2em] rounded-sm shadow-lg hover:bg-[#FF5757] transition"
@@ -525,6 +551,8 @@ export default function App() {
       {adminUnlocked && isAdminOpen && (
         <AdminPanel
           products={products}
+          settings={siteSettings}
+          onUpdateSiteSettings={handleUpdateSiteSettings}
           onAddProduct={handleAddProduct}
           onUpdateProduct={handleUpdateProduct}
           onDeleteProduct={handleDeleteProduct}
@@ -532,10 +560,8 @@ export default function App() {
         />
       )}
 
-      {/* Footer */}
-      <Footer />
+      <Footer settings={siteSettings} />
 
-      {/* Slide-Over Cart Drawer */}
       <CartDrawer
         isOpen={isCartOpen}
         onClose={() => setIsCartOpen(false)}
@@ -548,7 +574,6 @@ export default function App() {
         }}
       />
 
-      {/* Product Quick View Modal */}
       <ProductQuickViewModal
         product={quickViewProduct}
         onClose={() => setQuickViewProduct(null)}
@@ -561,7 +586,6 @@ export default function App() {
         }}
       />
 
-      {/* Doorstep Fit Engine & Backup Size Modal */}
       <SizeAssistantModal
         isOpen={isSizeAssistantOpen}
         onClose={() => setIsSizeAssistantOpen(false)}
@@ -569,7 +593,6 @@ export default function App() {
         onApplySize={handleApplySizeFromAssistant}
       />
 
-      {/* Instant Checkout & Live 10-Minute Radar Tracker Modal */}
       <CheckoutModal
         isOpen={isCheckoutOpen}
         onClose={() => setIsCheckoutOpen(false)}
@@ -578,11 +601,10 @@ export default function App() {
         existingOrder={activeOrder}
       />
 
-      {/* Floating Active Order Live Tracker Shortcut */}
       {activeOrder && !isCheckoutOpen && (
         <aside
           aria-label="Active delivery tracker shortcut"
-          className="fixed bottom-6 left-6 z-40 bg-[#111111] text-white px-4 py-3 rounded-sm shadow-2xl border border-[#FF5757]/40 flex items-center gap-3 backdrop-blur-md cursor-pointer hover:bg-[#1b1b1b] transition"
+          className="fixed bottom-6 left-6 z-40 bg-[#111111] text-white px-4 py-3 rounded-sm shadow-2xl border border-[#FF5757]/40 flex items-center gap-3 backdrop-blur-md cursor-pointer hover:bg-[#1a1a1a]"
           onClick={() => setIsCheckoutOpen(true)}
         >
           <div className="w-8 h-8 rounded-full bg-[#FF5757] flex items-center justify-center text-white shrink-0">
@@ -600,7 +622,6 @@ export default function App() {
         </aside>
       )}
 
-      {/* Delivery Zone Checker Modal */}
       <DeliveryCheckerModal
         isOpen={isDeliveryCheckerOpen}
         onClose={() => setIsDeliveryCheckerOpen(false)}
@@ -610,7 +631,6 @@ export default function App() {
         }}
       />
 
-      {/* Wishlist Modal */}
       <WishlistModal
         isOpen={isWishlistOpen}
         onClose={() => setIsWishlistOpen(false)}
@@ -624,7 +644,6 @@ export default function App() {
         onRemoveFromWishlist={handleToggleWishlist}
       />
 
-      {/* User Profile & Order History Modal */}
       <UserProfileModal
         isOpen={isProfileOpen}
         onClose={() => setIsProfileOpen(false)}
@@ -633,7 +652,6 @@ export default function App() {
         onReorder={handleReorderFromProfile}
       />
 
-      {/* Share With Friends / WhatsApp Modal */}
       <ShareModal
         isOpen={isShareOpen}
         onClose={() => setIsShareOpen(false)}
