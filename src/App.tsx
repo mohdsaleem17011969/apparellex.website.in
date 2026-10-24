@@ -22,8 +22,10 @@ import { SizeAssistantModal } from './components/SizeAssistantModal';
 import { ShareModal } from './components/ShareModal';
 import { AdminPanel } from './components/AdminPanel';
 import { AdminRouteGuard } from './components/AdminRouteGuard';
+import { SiteSettings, DEFAULT_SITE_SETTINGS } from './data/siteSettings';
 
 const STORAGE_KEY = 'apparellex-products-v1';
+const SETTINGS_STORAGE_KEY = 'apparellex-site-settings-v1';
 const ADMIN_QUERY_KEY = 'admin';
 const MAX_SEARCH_LENGTH = 80;
 
@@ -50,6 +52,22 @@ const getSavedProducts = (): Product[] => {
     return parsed;
   } catch {
     return PRODUCTS;
+  }
+};
+
+const getSavedSettings = (): SiteSettings => {
+  if (typeof window === 'undefined') return DEFAULT_SITE_SETTINGS;
+
+  try {
+    const saved = localStorage.getItem(SETTINGS_STORAGE_KEY);
+    if (!saved) return DEFAULT_SITE_SETTINGS;
+
+    const parsed = JSON.parse(saved) as SiteSettings;
+    if (!parsed || typeof parsed !== 'object') return DEFAULT_SITE_SETTINGS;
+
+    return { ...DEFAULT_SITE_SETTINGS, ...parsed };
+  } catch {
+    return DEFAULT_SITE_SETTINGS;
   }
 };
 
@@ -130,6 +148,7 @@ const INITIAL_PAST_ORDERS: PastOrderRecord[] = [
 
 function AppContent() {
   const [products, setProducts] = useState<Product[]>(getSavedProducts);
+  const [siteSettings, setSiteSettings] = useState<SiteSettings>(getSavedSettings);
   const [isAdminOpen, setIsAdminOpen] = useState(false);
   const [adminUnlocked, setAdminUnlocked] = useState(false);
   const [cart, setCart] = useState<CartItem[]>([]);
@@ -164,6 +183,16 @@ function AppContent() {
   }, [products]);
 
   useEffect(() => {
+    if (typeof window !== 'undefined') {
+      try {
+        localStorage.setItem(SETTINGS_STORAGE_KEY, JSON.stringify(siteSettings));
+      } catch {
+        // Ignore quota/storage issues gracefully.
+      }
+    }
+  }, [siteSettings]);
+
+  useEffect(() => {
     if (isAdminRouteRequested()) {
       setAdminUnlocked(true);
       setIsAdminOpen(true);
@@ -174,6 +203,9 @@ function AppContent() {
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key !== 'Escape') return;
 
+      setIsAdminOpen(false);
+      setAdminUnlocked(false);
+      syncAdminRoute(false);
       setQuickViewProduct(null);
       setIsCartOpen(false);
       setIsCheckoutOpen(false);
@@ -242,6 +274,18 @@ function AppContent() {
     setAdminUnlocked(false);
     syncAdminRoute(false);
     showToast('Admin closed');
+  };
+
+  const handleCloseAdmin = () => {
+    setIsAdminOpen(false);
+    setAdminUnlocked(false);
+    syncAdminRoute(false);
+    showToast('Admin panel closed');
+  };
+
+  const handleUpdateSiteSettings = (updated: SiteSettings) => {
+    setSiteSettings(updated);
+    showToast('Company & administration details saved');
   };
 
   const handleAddProduct = (newProduct: Product) => {
@@ -424,6 +468,7 @@ function AppContent() {
       )}
 
       <Header
+        settings={siteSettings}
         cartCount={totalCartItemCount}
         wishlistCount={wishlist.length}
         onOpenCart={() => setIsCartOpen(true)}
@@ -500,7 +545,7 @@ function AppContent() {
 
         <CommunityReviews onNotifyToast={showToast} />
 
-        <AboutSection />
+        <AboutSection settings={siteSettings} />
       </main>
 
       <button
@@ -513,6 +558,11 @@ function AppContent() {
       {adminUnlocked && isAdminOpen && (
         <AdminPanel
           products={products}
+          settings={siteSettings}
+          orders={orderHistory}
+          onUpdateOrderHistory={setOrderHistory}
+          onClose={handleCloseAdmin}
+          onUpdateSiteSettings={handleUpdateSiteSettings}
           onAddProduct={handleAddProduct}
           onUpdateProduct={handleUpdateProduct}
           onDeleteProduct={handleDeleteProduct}
@@ -520,7 +570,7 @@ function AppContent() {
         />
       )}
 
-      <Footer />
+      <Footer settings={siteSettings} />
 
       <CartDrawer
         isOpen={isCartOpen}

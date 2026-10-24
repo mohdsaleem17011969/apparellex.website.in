@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { ShoppingBag, Search, Heart, X, Zap, User, Share2 } from 'lucide-react';
 import { Product, PRODUCTS } from '../data/products';
 import { TrendingSearchesDropdown } from './TrendingSearchesDropdown';
+import { SiteSettings } from '../data/siteSettings';
 
 interface HeaderProps {
   cartCount: number;
@@ -16,6 +17,7 @@ interface HeaderProps {
   onOpenDeliveryChecker: () => void;
   products?: Product[];
   onQuickView?: (product: Product) => void;
+  settings?: SiteSettings;
 }
 
 export const Header: React.FC<HeaderProps> = ({
@@ -31,6 +33,7 @@ export const Header: React.FC<HeaderProps> = ({
   onOpenDeliveryChecker,
   products,
   onQuickView,
+  settings,
 }) => {
   const [showSearch, setShowSearch] = useState(false);
   const [showBanner, setShowBanner] = useState(true);
@@ -59,15 +62,19 @@ export const Header: React.FC<HeaderProps> = ({
     });
   };
 
+  const isBannerVisible = showBanner && (settings?.showAnnouncementBar !== false);
+  const bannerMessage = settings?.announcementBarText || '10-Minute Instant Fashion Delivery Active in Your Zone';
+  const brandTitle = settings?.companyName ? settings.companyName.toUpperCase() : 'APPARELLEX';
+
   return (
     <>
       {/* TOP ANNOUNCEMENT BANNER */}
-      {showBanner && (
+      {isBannerVisible && (
         <aside aria-label="Announcement" className="bg-[#111111] text-white text-xs py-2 px-4 flex items-center justify-between border-b border-white/10 relative z-50">
           <div className="container mx-auto flex items-center justify-center gap-3 text-center">
             <span className="inline-flex items-center gap-1.5 font-medium tracking-wide">
               <Zap className="w-3.5 h-3.5 text-[#FF5757] fill-[#FF5757]" />
-              <span>10-Minute Instant Fashion Delivery Active in Your Zone</span>
+              <span>{bannerMessage}</span>
             </span>
             <span className="hidden sm:inline text-white/40">|</span>
             <button
@@ -95,7 +102,7 @@ export const Header: React.FC<HeaderProps> = ({
             href="#home"
             className="text-2xl md:text-3xl font-extrabold tracking-tighter font-fashion text-[#1a1a1a] hover:opacity-90 transition select-none"
           >
-            APPARELLEX
+            {brandTitle}
           </a>
 
           {/* Zone 2: Clean text navigation links */}
