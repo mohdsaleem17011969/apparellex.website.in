@@ -1,11 +1,20 @@
 import React, { useState } from 'react';
-import { X, MapPin, Zap, CheckCircle2, Clock, Bike } from 'lucide-react';
+import { X, MapPin, Zap, CheckCircle2, Clock, Bike, Compass } from 'lucide-react';
+import { PincodeDeliveryMap } from './PincodeDeliveryMap';
 
 interface DeliveryCheckerModalProps {
   isOpen: boolean;
   onClose: () => void;
   onStartShopping: () => void;
 }
+
+const POPULAR_ZONES = [
+  { code: '10012', label: 'SoHo' },
+  { code: '10001', label: 'Chelsea' },
+  { code: '10003', label: 'East Village' },
+  { code: '10019', label: 'Midtown' },
+  { code: '90210', label: 'Beverly Hills' },
+];
 
 export const DeliveryCheckerModal: React.FC<DeliveryCheckerModalProps> = ({
   isOpen,
@@ -14,8 +23,8 @@ export const DeliveryCheckerModal: React.FC<DeliveryCheckerModalProps> = ({
 }) => {
   if (!isOpen) return null;
 
-  const [postalInput, setPostalInput] = useState('');
-  const [checked, setChecked] = useState(false);
+  const [postalInput, setPostalInput] = useState('10012');
+  const [checked, setChecked] = useState(true);
   const [isVerifying, setIsVerifying] = useState(false);
 
   const handleVerify = (e: React.FormEvent) => {
@@ -28,16 +37,21 @@ export const DeliveryCheckerModal: React.FC<DeliveryCheckerModalProps> = ({
     }, 450);
   };
 
+  const handleSelectZone = (code: string) => {
+    setPostalInput(code);
+    setChecked(true);
+  };
+
   return (
     <div
       role="dialog"
       aria-modal="true"
       aria-labelledby="delivery-checker-title"
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fadeIn"
+      className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-5 bg-black/75 backdrop-blur-sm animate-fadeIn"
       onClick={onClose}
     >
       <div
-        className="bg-white max-w-lg w-full rounded-sm overflow-hidden shadow-2xl relative border border-black/10"
+        className="bg-white max-w-2xl w-full rounded-sm overflow-hidden shadow-2xl relative border border-black/10 max-h-[92vh] flex flex-col"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
@@ -45,7 +59,7 @@ export const DeliveryCheckerModal: React.FC<DeliveryCheckerModalProps> = ({
           <div className="flex items-center gap-2">
             <Zap className="w-5 h-5 text-[#FF5757] fill-[#FF5757]" />
             <h2 id="delivery-checker-title" className="text-sm font-black font-fashion uppercase tracking-wider">
-              Verify 10-Minute Instant Dispatch Zone
+              Google Maps 10-Minute Instant Dispatch Radar
             </h2>
           </div>
           <button
@@ -58,73 +72,77 @@ export const DeliveryCheckerModal: React.FC<DeliveryCheckerModalProps> = ({
         </div>
 
         {/* Content */}
-        <div className="p-6 space-y-6">
+        <div className="p-5 sm:p-6 space-y-4 overflow-y-auto flex-1">
           <div>
             <p className="text-xs text-black/70 leading-relaxed font-light">
-              Apparellex operates neighborhood micro-fulfillment pods equipped with precision dark stores and dedicated electric bike fleets.
+              Apparellex operates neighborhood micro-fulfillment pods equipped with precision dark stores and dedicated electric Super73 cargo bike fleets.
             </p>
           </div>
 
-          <form onSubmit={handleVerify} className="space-y-3">
+          <form onSubmit={handleVerify} className="space-y-2">
             <label className="block text-xs font-bold uppercase tracking-wider text-black">
               Enter Your Postal Code or Neighborhood:
             </label>
             <div className="flex gap-2">
               <div className="relative flex-1">
-                <MapPin className="w-4 h-4 absolute left-3 top-3.5 text-black/40" />
+                <MapPin className="w-4 h-4 absolute left-3 top-3 text-black/40" />
                 <input
                   type="text"
                   required
                   value={postalInput}
                   onChange={(e) => {
                     setPostalInput(e.target.value);
-                    setChecked(false);
                   }}
-                  placeholder="e.g. 10001, SoHo, 90210, Camden..."
-                  className="w-full text-xs pl-9 pr-3 py-3 border border-black/20 rounded-sm bg-white focus:border-[#FF5757] outline-none"
+                  placeholder="e.g. 10012, 10001, SoHo, 90210..."
+                  className="w-full text-xs pl-9 pr-3 py-2.5 border border-black/20 rounded-sm bg-white focus:border-[#FF5757] outline-none"
                 />
               </div>
               <button
                 type="submit"
                 disabled={isVerifying}
-                className="bg-[#1a1a1a] hover:bg-[#FF5757] text-white px-5 py-3 rounded-sm text-xs font-bold uppercase tracking-wider transition cursor-pointer disabled:opacity-50"
+                className="bg-[#1a1a1a] hover:bg-[#FF5757] text-white px-5 py-2.5 rounded-sm text-xs font-bold uppercase tracking-wider transition cursor-pointer disabled:opacity-50"
               >
                 {isVerifying ? 'Checking...' : 'Check Zone'}
               </button>
             </div>
+
+            {/* Quick zone chips */}
+            <div className="flex items-center gap-1.5 flex-wrap pt-1">
+              <span className="text-[10px] text-black/50 font-bold uppercase tracking-wider">
+                Quick Select:
+              </span>
+              {POPULAR_ZONES.map((zone) => (
+                <button
+                  key={zone.code}
+                  type="button"
+                  onClick={() => handleSelectZone(zone.code)}
+                  className={`px-2 py-0.5 text-[10px] font-bold rounded-xs transition cursor-pointer border ${
+                    postalInput === zone.code
+                      ? 'bg-[#111111] text-white border-black'
+                      : 'bg-white hover:border-[#FF5757] text-black/70 border-black/15'
+                  }`}
+                >
+                  {zone.code} ({zone.label})
+                </button>
+              ))}
+            </div>
           </form>
+
+          {/* Interactive Google Map of Delivery Zone */}
+          <PincodeDeliveryMap pincode={postalInput || '10012'} isEligible={checked} />
 
           {/* Result Card */}
           {checked && (
-            <div className="bg-[#FAF8F2] border border-black/15 p-4 rounded-sm space-y-3 animate-fadeIn">
+            <div className="bg-[#FAF8F2] border border-black/15 p-3.5 rounded-sm space-y-3 animate-fadeIn">
               <div className="flex items-center gap-2 text-emerald-800">
                 <CheckCircle2 className="w-5 h-5 text-emerald-600 shrink-0" />
                 <div>
                   <h4 className="text-xs font-bold uppercase tracking-wider text-emerald-900">
-                    10-Minute Dispatch Active in "{postalInput}"
+                    10-Minute Priority Dispatch Active in "{postalInput}"
                   </h4>
                   <p className="text-[11px] text-emerald-700">
-                    Nearest Pod: <strong>Apparellex Central Hub #04</strong> (0.8 mi)
+                    Serviced directly by nearest dark store micro-hub with 15-min doorstep try-on.
                   </p>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-3 gap-2 pt-2 border-t border-black/10 text-center">
-                <div className="bg-white p-2 rounded-xs border border-black/5">
-                  <span className="text-[10px] text-black/50 uppercase block font-semibold">Average ETA</span>
-                  <span className="text-xs font-black text-black flex items-center justify-center gap-1 mt-0.5">
-                    <Clock className="w-3 h-3 text-[#FF5757]" /> 8-11 Mins
-                  </span>
-                </div>
-                <div className="bg-white p-2 rounded-xs border border-black/5">
-                  <span className="text-[10px] text-black/50 uppercase block font-semibold">Pack Speed</span>
-                  <span className="text-xs font-black text-black mt-0.5 block">118 Secs</span>
-                </div>
-                <div className="bg-white p-2 rounded-xs border border-black/5">
-                  <span className="text-[10px] text-black/50 uppercase block font-semibold">Couriers On Duty</span>
-                  <span className="text-xs font-black text-black flex items-center justify-center gap-1 mt-0.5">
-                    <Bike className="w-3 h-3 text-emerald-600" /> 7 Active
-                  </span>
                 </div>
               </div>
 
@@ -133,17 +151,10 @@ export const DeliveryCheckerModal: React.FC<DeliveryCheckerModalProps> = ({
                   onClose();
                   onStartShopping();
                 }}
-                className="w-full bg-[#111111] hover:bg-[#FF5757] text-white py-2.5 rounded-sm text-xs font-bold uppercase tracking-wider transition mt-2 cursor-pointer"
+                className="w-full bg-[#111111] hover:bg-[#FF5757] text-white py-3 rounded-sm text-xs font-black uppercase tracking-wider transition cursor-pointer shadow-md"
               >
-                Shop Available 10-Min Drops
+                Start Shopping Now — Order for 10-Minute Delivery
               </button>
-            </div>
-          )}
-
-          {!checked && (
-            <div className="bg-stone-50 p-3 rounded-sm border border-stone-200 text-[11px] text-black/60 flex items-center gap-2">
-              <Zap className="w-4 h-4 text-[#FF5757] shrink-0" />
-              <span>We currently cover top metropolitan fashion districts with 10-minute instant delivery guarantees.</span>
             </div>
           )}
         </div>

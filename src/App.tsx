@@ -24,6 +24,7 @@ import { AdminPanel } from './components/AdminPanel';
 import { AdminRouteGuard } from './components/AdminRouteGuard';
 import { SiteSettings, DEFAULT_SITE_SETTINGS } from './data/siteSettings';
 import { AuthFlow, AuthUser } from './components/AuthFlow';
+import { GoogleMapsWrapper } from './components/GoogleMapsWrapper';
 
 const STORAGE_KEY = 'apparellex-products-v1';
 const SETTINGS_STORAGE_KEY = 'apparellex-site-settings-v1';
@@ -723,8 +724,10 @@ function AppContent() {
 
 export default function App() {
   return (
-    <AdminRouteGuard>
-      <AppContent />
-    </AdminRouteGuard>
+    <GoogleMapsWrapper>
+      <AdminRouteGuard>
+        <AppContent />
+      </AdminRouteGuard>
+    </GoogleMapsWrapper>
   );
 }

@@ -17,6 +17,7 @@ import {
   RotateCcw,
   Star
 } from 'lucide-react';
+import { LiveOrderRouteMap } from './LiveOrderRouteMap';
 
 export interface OrderDetails {
   orderId: string;
@@ -380,6 +381,9 @@ export const OrderTracker: React.FC<OrderTrackerProps> = ({
           })}
         </div>
       </div>
+
+      {/* Live Google Maps GPS Courier Radar & Route Navigation */}
+      <LiveOrderRouteMap order={order} secondsRemaining={secondsRemaining} />
 
       {/* Courier & Dark Store Dispatch Information */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
