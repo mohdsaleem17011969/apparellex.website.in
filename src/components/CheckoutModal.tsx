@@ -1,8 +1,14 @@
 import React, { useState } from 'react';
 import { CartItem } from '../data/products';
-import { X, Clock, Zap, User, Phone, Home, CreditCard, Banknote, AlertCircle } from 'lucide-react';
+import { X, Clock, Zap, User, Phone, Home, CreditCard, Banknote, AlertCircle, Award } from 'lucide-react';
 import { OrderTracker, OrderDetails } from './OrderTracker';
 import { ConfettiCanvas } from './ConfettiCanvas';
+import {
+  LoyaltyTracker,
+  getSavedLoyaltyAccount,
+  saveLoyaltyAccount,
+  POINTS_EARNED_PER_DOLLAR,
+} from './LoyaltyTracker';
 
 interface CheckoutModalProps {
   isOpen: boolean;
@@ -33,9 +39,18 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
   const [showConfetti, setShowConfetti] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
 
+  // Loyalty Points Redemption State
+  const [redeemedPoints, setRedeemedPoints] = useState(0);
+  const [pointsDiscount, setPointsDiscount] = useState(0);
+
   const subtotal = items.reduce((sum, item) => sum + item.product.price * item.quantity, 0);
   const deliveryFee = subtotal >= 100 || items.length === 0 ? 0 : 7;
-  const total = subtotal + deliveryFee;
+  const finalTotal = Math.max(0, subtotal + deliveryFee - pointsDiscount);
+
+  const handleRedeemPoints = (points: number, discount: number) => {
+    setRedeemedPoints(points);
+    setPointsDiscount(discount);
+  };
 
   const handleSubmitOrder = (e: React.FormEvent) => {
     e.preventDefault();
@@ -45,17 +60,61 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
       return;
     }
 
+    const orderId = `APX-${Math.floor(100000 + Math.random() * 900000)}`;
+
     const orderData: OrderDetails = {
-      orderId: `APX-${Math.floor(100000 + Math.random() * 900000)}`,
+      orderId,
       name: name.trim(),
       phone: phone.trim(),
       address: address.trim(),
       postalCode: postalCode.trim() || '10001',
       paymentMethod,
-      totalAmount: total,
+      totalAmount: finalTotal,
       items: [...items],
       createdAt: new Date(),
     };
+
+    // Credit newly earned loyalty points and deduct redeemed points
+    try {
+      const currentLoyalty = getSavedLoyaltyAccount();
+      let newBalance = currentLoyalty.balance;
+      const historyEntries = [...currentLoyalty.history];
+      const nowStr = new Date().toLocaleDateString('en-US', {
+        month: 'short',
+        day: 'numeric',
+        year: 'numeric',
+      });
+
+      if (redeemedPoints > 0) {
+        newBalance = Math.max(0, newBalance - redeemedPoints);
+        historyEntries.unshift({
+          id: `tx-red-${Date.now()}`,
+          description: `Redeemed on Order #${orderId} (-$${pointsDiscount.toFixed(2)})`,
+          points: -redeemedPoints,
+          date: nowStr,
+        });
+      }
+
+      const earned = Math.round(
+        Math.max(0, finalTotal) * POINTS_EARNED_PER_DOLLAR * (currentLoyalty.multiplier || 1)
+      );
+      newBalance += earned;
+      historyEntries.unshift({
+        id: `tx-earn-${Date.now()}`,
+        description: `Earned on Order #${orderId} (${currentLoyalty.multiplier}x VIP)`,
+        points: +earned,
+        date: nowStr,
+      });
+
+      saveLoyaltyAccount({
+        ...currentLoyalty,
+        balance: newBalance,
+        lifetimeEarned: currentLoyalty.lifetimeEarned + earned,
+        history: historyEntries.slice(0, 30),
+      });
+    } catch {
+      // Ignore
+    }
 
     setConfirmedOrder(orderData);
     setStep('tracking');
@@ -120,21 +179,43 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
                 </div>
               )}
 
-              {/* Order Mini Summary */}
-              <div className="bg-[#FAF8F2] p-4 rounded-sm border border-black/10 flex items-center justify-between text-xs">
-                <div>
-                  <span className="text-black/50 uppercase font-semibold tracking-wider block">
+              {/* Order Mini Summary with Dynamic Loyalty Calculations */}
+              <div className="bg-[#FAF8F2] p-4 rounded-sm border border-black/10 text-xs space-y-2">
+                <div className="flex items-center justify-between pb-2 border-b border-black/10">
+                  <span className="text-black/50 uppercase font-semibold tracking-wider">
                     Order Items ({items.reduce((a, b) => a + b.quantity, 0)})
                   </span>
-                  <span className="font-bold text-[#1a1a1a] text-sm tabular-nums">
-                    Total: ${total.toFixed(0)}
-                  </span>
-                </div>
-                <div className="text-right">
                   <span className="inline-flex items-center gap-1 font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded text-[11px]">
                     <Clock className="w-3 h-3" />
                     Target ETA: ~10 Mins
                   </span>
+                </div>
+                <div className="flex items-center justify-between text-black/70">
+                  <span>Subtotal</span>
+                  <span className="tabular-nums font-medium">${subtotal.toFixed(0)}</span>
+                </div>
+                <div className="flex items-center justify-between text-black/70">
+                  <span>10-Minute Dark Store Dispatch</span>
+                  <span className="tabular-nums font-medium">
+                    {deliveryFee === 0 ? (
+                      <span className="text-emerald-700 font-bold uppercase text-[10px]">FREE</span>
+                    ) : (
+                      `$${deliveryFee}`
+                    )}
+                  </span>
+                </div>
+                {pointsDiscount > 0 && (
+                  <div className="flex items-center justify-between text-emerald-700 font-bold animate-fadeIn">
+                    <span className="flex items-center gap-1">
+                      <Award className="w-3.5 h-3.5" />
+                      <span>Loyalty Reward ({redeemedPoints} pts redeemed)</span>
+                    </span>
+                    <span className="tabular-nums">-${pointsDiscount.toFixed(2)}</span>
+                  </div>
+                )}
+                <div className="flex items-center justify-between pt-2 border-t border-black/10 text-sm font-black text-[#1a1a1a]">
+                  <span>Total Payable</span>
+                  <span className="tabular-nums text-base text-[#111111]">${finalTotal.toFixed(0)}</span>
                 </div>
               </div>
 
@@ -222,11 +303,21 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
                 </div>
               </div>
 
-              {/* Payment Methods */}
+              {/* 3. Loyalty Points Tracker & Discount Redemption */}
+              <div className="space-y-2">
+                <LoyaltyTracker
+                  cartTotal={subtotal + deliveryFee}
+                  appliedPoints={redeemedPoints}
+                  onRedeemPoints={handleRedeemPoints}
+                  mode="checkout"
+                />
+              </div>
+
+              {/* 4. Payment Methods */}
               <div className="space-y-3">
                 <h3 className="text-xs font-bold uppercase tracking-widest text-[#1a1a1a] flex items-center gap-1.5 border-b border-black/10 pb-2">
                   <CreditCard className="w-3.5 h-3.5 text-[#FF5757]" />
-                  <span>3. Payment Method</span>
+                  <span>4. Payment Method</span>
                 </h3>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">

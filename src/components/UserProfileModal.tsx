@@ -19,6 +19,7 @@ import {
   Star
 } from 'lucide-react';
 import { CartItem } from '../data/products';
+import { LoyaltyTracker } from './LoyaltyTracker';
 
 export interface PastOrderRecord extends OrderDetails {
   statusText: string;
@@ -34,6 +35,14 @@ interface UserProfileModalProps {
   onTrackOrder: (order: OrderDetails) => void;
   onReorder: (items: CartItem[]) => void;
   onOpenFeedback?: (order: OrderDetails) => void;
+  currentUser?: {
+    name: string;
+    email: string;
+    avatar?: string;
+    isVip?: boolean;
+    tier?: string;
+  } | null;
+  onSignOut?: () => void;
 }
 
 export const UserProfileModal: React.FC<UserProfileModalProps> = ({
@@ -43,6 +52,8 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
   onTrackOrder,
   onReorder,
   onOpenFeedback,
+  currentUser,
+  onSignOut,
 }) => {
   if (!isOpen) return null;
 
@@ -73,25 +84,43 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
         {/* Modal Top Header */}
         <div className="p-5 sm:p-6 border-b border-black/10 flex items-center justify-between bg-[#111111] text-white">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-full bg-[#FF5757] text-white flex items-center justify-center font-bold text-base font-fashion">
-              SK
+            <div className="w-10 h-10 rounded-full bg-[#FF5757] text-white flex items-center justify-center font-bold text-base font-fashion overflow-hidden">
+              {currentUser?.avatar ? (
+                <img src={currentUser.avatar} alt={currentUser.name} className="w-full h-full object-cover" />
+              ) : (
+                (currentUser?.name || 'Shaikh Kamran')
+                  .split(' ')
+                  .map((n) => n[0])
+                  .join('')
+                  .slice(0, 2)
+              )}
             </div>
             <div>
               <h2 id="profile-modal-title" className="text-base font-black font-fashion uppercase tracking-wider text-white">
                 Member Profile & Order History
               </h2>
               <p className="text-[11px] text-white/60">
-                Shaikh Kamran · Apparellex Black Diamond VIP
+                {currentUser?.name || 'Shaikh Kamran'} · {currentUser?.tier || 'Apparellex Black Diamond VIP'}
               </p>
             </div>
           </div>
-          <button
-            onClick={onClose}
-            className="text-white/60 hover:text-white transition p-1 cursor-pointer"
-            aria-label="Close modal"
-          >
-            <X className="w-5 h-5" />
-          </button>
+          <div className="flex items-center gap-2.5">
+            {onSignOut && (
+              <button
+                onClick={onSignOut}
+                className="text-xs text-stone-300 hover:text-white bg-white/10 hover:bg-white/20 px-3 py-1.5 rounded transition cursor-pointer"
+              >
+                Sign Out
+              </button>
+            )}
+            <button
+              onClick={onClose}
+              className="text-white/60 hover:text-white transition p-1 cursor-pointer"
+              aria-label="Close modal"
+            >
+              <X className="w-5 h-5" />
+            </button>
+          </div>
         </div>
 
         {/* Profile Stats & Navigation Tabs */}
@@ -435,6 +464,9 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
                   </p>
                 </div>
               </div>
+
+              {/* Loyalty Points Tracker & Balance Widget */}
+              <LoyaltyTracker cartTotal={0} mode="checkout" />
 
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-xs">
                 <div className="p-4 bg-[#FAF8F2] border border-black/10 rounded-sm">

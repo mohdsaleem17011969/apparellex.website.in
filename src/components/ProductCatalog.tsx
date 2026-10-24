@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Product } from '../data/products';
-import { Heart, Eye, ShoppingBag, Zap, Star, Filter, ArrowUpDown } from 'lucide-react';
+import { Heart, Eye, ShoppingBag, Zap, Star, Filter, ArrowUpDown, ArrowLeftRight } from 'lucide-react';
 
 interface ProductCatalogProps {
   products: Product[];
@@ -13,6 +13,9 @@ interface ProductCatalogProps {
   onToggleWishlist: (productId: string) => void;
   onQuickView: (product: Product) => void;
   onAddToCart: (product: Product, size: string, color: { name: string; hex: string }) => void;
+  compareProductIds?: string[];
+  onToggleCompare?: (productId: string) => void;
+  onOpenCompareModal?: () => void;
 }
 
 export const ProductCatalog: React.FC<ProductCatalogProps> = ({
@@ -26,6 +29,9 @@ export const ProductCatalog: React.FC<ProductCatalogProps> = ({
   onToggleWishlist,
   onQuickView,
   onAddToCart,
+  compareProductIds = [],
+  onToggleCompare,
+  onOpenCompareModal,
 }) => {
   const [sortBy, setSortBy] = useState<'featured' | 'price-asc' | 'price-desc' | 'delivery'>('featured');
   const [selectedSizes, setSelectedSizes] = useState<{ [productId: string]: string }>({});
@@ -92,8 +98,23 @@ export const ProductCatalog: React.FC<ProductCatalogProps> = ({
             </p>
           </div>
 
-          {/* Sort Controller */}
+          {/* Compare Shortcut & Sort Controller */}
           <div className="flex items-center gap-3">
+            {onOpenCompareModal && (
+              <button
+                onClick={onOpenCompareModal}
+                className={`px-3 py-2 text-xs font-bold rounded-sm border flex items-center gap-1.5 transition cursor-pointer ${
+                  compareProductIds.length > 0
+                    ? 'bg-[#FF5757] text-white border-[#FF5757] shadow-sm'
+                    : 'bg-white text-black/70 border-black/15 hover:border-black/30'
+                }`}
+                title="Open Side-by-Side Product Comparison"
+              >
+                <ArrowLeftRight className="w-3.5 h-3.5" />
+                <span>Compare {compareProductIds.length > 0 ? `(${compareProductIds.length}/2)` : ''}</span>
+              </button>
+            )}
+
             <span className="text-xs uppercase tracking-wider text-black/60 font-semibold flex items-center gap-1.5">
               <ArrowUpDown className="w-3.5 h-3.5" />
               <span>Sort:</span>
@@ -192,6 +213,7 @@ export const ProductCatalog: React.FC<ProductCatalogProps> = ({
             {sortedProducts.map((product) => {
               const currentSize = getActiveSize(product);
               const isWishlisted = wishlist.includes(product.id);
+              const isCompared = compareProductIds.includes(product.id);
 
               return (
                 <article
@@ -217,29 +239,51 @@ export const ProductCatalog: React.FC<ProductCatalogProps> = ({
                       </div>
                     )}
 
-                    {/* Top Row Indicators: Tag & Wishlist Button */}
-                    <div className="absolute top-3 left-3 right-3 flex items-center justify-between">
+                    {/* Top Row Indicators: Tag & Action Buttons (Wishlist & Compare) */}
+                    <div className="absolute top-3 left-3 right-3 flex items-center justify-between pointer-events-none">
                       {product.tag ? (
-                        <span className="text-[10px] font-extrabold uppercase tracking-widest bg-black/80 backdrop-blur-sm text-white px-2 py-0.5 rounded-sm">
+                        <span className="text-[10px] font-extrabold uppercase tracking-widest bg-black/80 backdrop-blur-sm text-white px-2 py-0.5 rounded-sm pointer-events-auto">
                           {product.tag}
                         </span>
                       ) : (
                         <div />
                       )}
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          onToggleWishlist(product.id);
-                        }}
-                        className="w-8 h-8 rounded-full bg-white/90 hover:bg-white text-black flex items-center justify-center shadow-sm transition hover:scale-110 cursor-pointer"
-                        aria-label="Add to wishlist"
-                      >
-                        <Heart
-                          className={`w-4 h-4 transition-colors ${
-                            isWishlisted ? 'fill-[#FF5757] text-[#FF5757]' : 'text-black/80'
-                          }`}
-                        />
-                      </button>
+
+                      <div className="flex items-center gap-1.5 pointer-events-auto">
+                        {onToggleCompare && (
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              onToggleCompare(product.id);
+                            }}
+                            className={`w-8 h-8 rounded-full flex items-center justify-center shadow-sm transition hover:scale-110 cursor-pointer ${
+                              isCompared
+                                ? 'bg-[#FF5757] text-white shadow-md shadow-[#FF5757]/30 ring-2 ring-white'
+                                : 'bg-white/90 hover:bg-white text-black'
+                            }`}
+                            aria-label={isCompared ? 'Remove from comparison' : 'Compare product'}
+                            title={isCompared ? 'In comparison (click to remove)' : 'Add to side-by-side comparison'}
+                          >
+                            <ArrowLeftRight className="w-3.5 h-3.5" />
+                          </button>
+                        )}
+
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            onToggleWishlist(product.id);
+                          }}
+                          className="w-8 h-8 rounded-full bg-white/90 hover:bg-white text-black flex items-center justify-center shadow-sm transition hover:scale-110 cursor-pointer"
+                          aria-label="Add to wishlist"
+                          title="Save to wishlist"
+                        >
+                          <Heart
+                            className={`w-4 h-4 transition-colors ${
+                              isWishlisted ? 'fill-[#FF5757] text-[#FF5757]' : 'text-black/80'
+                            }`}
+                          />
+                        </button>
+                      </div>
                     </div>
 
                     {/* Delivery ETA Chip */}

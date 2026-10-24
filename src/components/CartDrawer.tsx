@@ -1,6 +1,7 @@
 import React from 'react';
 import { CartItem } from '../data/products';
 import { X, Trash2, ArrowRight, Zap, ShoppingBag, ShieldCheck } from 'lucide-react';
+import { LoyaltyTracker } from './LoyaltyTracker';
 
 interface CartDrawerProps {
   isOpen: boolean;
@@ -199,6 +200,9 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
                   <span className="tabular-nums">${total.toFixed(0)}</span>
                 </div>
               </div>
+
+              {/* Compact Loyalty Rewards Earning Preview */}
+              <LoyaltyTracker cartTotal={total} mode="compact" />
 
               <button
                 onClick={onProceedToCheckout}

@@ -18,6 +18,8 @@ interface HeaderProps {
   products?: Product[];
   onQuickView?: (product: Product) => void;
   settings?: SiteSettings;
+  currentUser?: { name: string; email: string; avatar?: string; isVip?: boolean } | null;
+  onOpenAuth?: (mode?: 'login' | 'signup') => void;
 }
 
 export const Header: React.FC<HeaderProps> = ({
@@ -34,6 +36,8 @@ export const Header: React.FC<HeaderProps> = ({
   products,
   onQuickView,
   settings,
+  currentUser,
+  onOpenAuth,
 }) => {
   const [showSearch, setShowSearch] = useState(false);
   const [showBanner, setShowBanner] = useState(true);
@@ -168,14 +172,36 @@ export const Header: React.FC<HeaderProps> = ({
               </button>
             )}
 
+            {/* High-Converting Auth / Sign In Trigger */}
+            {onOpenAuth && !currentUser && (
+              <button
+                onClick={() => onOpenAuth('login')}
+                className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-black/15 hover:border-[#FF5757] hover:text-[#FF5757] text-xs font-bold uppercase tracking-wider transition cursor-pointer"
+              >
+                <User className="w-3.5 h-3.5" />
+                <span>Sign In</span>
+              </button>
+            )}
+
             {/* Profile & Order History Button */}
             <button
-              onClick={onOpenProfile}
-              className="p-2 text-[#1a1a1a] hover:text-[#FF5757] transition-colors rounded-full hover:bg-black/5 cursor-pointer"
-              aria-label="View profile and order history"
-              title="Profile & Orders"
+              onClick={currentUser ? onOpenProfile : (onOpenAuth ? () => onOpenAuth('login') : onOpenProfile)}
+              className="p-1.5 text-[#1a1a1a] hover:text-[#FF5757] transition-colors rounded-full hover:bg-black/5 cursor-pointer flex items-center justify-center"
+              aria-label={currentUser ? `Profile of ${currentUser.name}` : 'Sign in or view profile'}
+              title={currentUser ? `${currentUser.name} (VIP Member)` : 'Sign In / Profile'}
             >
-              <User className="w-5 h-5" />
+              {currentUser?.avatar ? (
+                <div className="relative">
+                  <img
+                    src={currentUser.avatar}
+                    alt={currentUser.name}
+                    className="w-6 h-6 rounded-full object-cover border-2 border-[#FF5757]"
+                  />
+                  <span className="w-2 h-2 rounded-full bg-emerald-500 absolute bottom-0 right-0 ring-1 ring-white" />
+                </div>
+              ) : (
+                <User className="w-5 h-5" />
+              )}
             </button>
 
             {/* Wishlist Button */}

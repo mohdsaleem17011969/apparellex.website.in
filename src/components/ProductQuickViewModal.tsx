@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Product } from '../data/products';
-import { X, Star, Zap, ShieldCheck, RefreshCw, ShoppingBag, Heart, Ruler } from 'lucide-react';
+import { X, Star, Zap, ShieldCheck, RefreshCw, ShoppingBag, Heart, Ruler, ArrowLeftRight } from 'lucide-react';
 
 interface ProductQuickViewModalProps {
   product: Product | null;
@@ -9,6 +9,7 @@ interface ProductQuickViewModalProps {
   isWishlisted: boolean;
   onToggleWishlist: (productId: string) => void;
   onOpenFitAssistant?: () => void;
+  onOpenCompare?: (product: Product) => void;
 }
 
 export const ProductQuickViewModal: React.FC<ProductQuickViewModalProps> = ({
@@ -18,6 +19,7 @@ export const ProductQuickViewModal: React.FC<ProductQuickViewModalProps> = ({
   isWishlisted,
   onToggleWishlist,
   onOpenFitAssistant,
+  onOpenCompare,
 }) => {
   if (!product) return null;
 
@@ -198,6 +200,19 @@ export const ProductQuickViewModal: React.FC<ProductQuickViewModalProps> = ({
 
           {/* Action Module */}
           <div className="pt-4 border-t border-black/10">
+            {onOpenCompare && (
+              <button
+                onClick={() => {
+                  onClose();
+                  onOpenCompare(product);
+                }}
+                className="w-full mb-3 py-2 px-3 border border-black/15 hover:border-black/30 rounded-sm text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-1.5 transition text-black/80 hover:text-black cursor-pointer bg-black/[0.02]"
+              >
+                <ArrowLeftRight className="w-3.5 h-3.5 text-[#FF5757]" />
+                <span>Compare Side-by-Side</span>
+              </button>
+            )}
+
             <div className="flex items-center gap-3 mb-3">
               {/* Quantity */}
               <div className="flex items-center border border-black/20 rounded-sm bg-white">

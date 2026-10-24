@@ -23,11 +23,23 @@ import { ShareModal } from './components/ShareModal';
 import { AdminPanel } from './components/AdminPanel';
 import { AdminRouteGuard } from './components/AdminRouteGuard';
 import { SiteSettings, DEFAULT_SITE_SETTINGS } from './data/siteSettings';
+import { AuthFlow, AuthUser } from './components/AuthFlow';
 
 const STORAGE_KEY = 'apparellex-products-v1';
 const SETTINGS_STORAGE_KEY = 'apparellex-site-settings-v1';
+const AUTH_STORAGE_KEY = 'apparellex_auth_user';
 const ADMIN_QUERY_KEY = 'admin';
 const MAX_SEARCH_LENGTH = 80;
+
+const getSavedAuthUser = (): AuthUser | null => {
+  if (typeof window === 'undefined') return null;
+  try {
+    const saved = localStorage.getItem(AUTH_STORAGE_KEY);
+    return saved ? (JSON.parse(saved) as AuthUser) : null;
+  } catch {
+    return null;
+  }
+};
 
 const sanitizeSearchValue = (value: string): string =>
   value.replace(/[<>]/g, '').trim().slice(0, MAX_SEARCH_LENGTH);
@@ -171,6 +183,9 @@ function AppContent() {
   const [isDeliveryCheckerOpen, setIsDeliveryCheckerOpen] = useState(false);
   const [isSizeAssistantOpen, setIsSizeAssistantOpen] = useState(false);
   const [sizeAssistantProduct, setSizeAssistantProduct] = useState<Product | null>(null);
+  const [isAuthOpen, setIsAuthOpen] = useState(false);
+  const [authInitialMode, setAuthInitialMode] = useState<'login' | 'signup'>('login');
+  const [currentUser, setCurrentUser] = useState<AuthUser | null>(getSavedAuthUser);
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -214,6 +229,7 @@ function AppContent() {
       setIsShareOpen(false);
       setIsDeliveryCheckerOpen(false);
       setIsSizeAssistantOpen(false);
+      setIsAuthOpen(false);
     };
 
     window.addEventListener('keydown', handleKeyDown);
@@ -242,6 +258,28 @@ function AppContent() {
       }
     };
   }, []);
+
+  const handleOpenAuth = useCallback((mode: 'login' | 'signup' = 'login') => {
+    setAuthInitialMode(mode);
+    setIsAuthOpen(true);
+  }, []);
+
+  const handleAuthSuccess = useCallback(
+    (user: AuthUser) => {
+      setCurrentUser(user);
+      showToast(`Welcome, ${user.name}!`);
+    },
+    [showToast]
+  );
+
+  const handleSignOut = useCallback(() => {
+    setCurrentUser(null);
+    if (typeof window !== 'undefined') {
+      localStorage.removeItem(AUTH_STORAGE_KEY);
+    }
+    setIsProfileOpen(false);
+    showToast('You have been signed out.');
+  }, [showToast]);
 
   const syncAdminRoute = (open: boolean) => {
     if (typeof window === 'undefined') return;
@@ -483,6 +521,8 @@ function AppContent() {
           if (el) el.scrollIntoView({ behavior: 'smooth' });
         }}
         onOpenDeliveryChecker={() => setIsDeliveryCheckerOpen(true)}
+        currentUser={currentUser}
+        onOpenAuth={handleOpenAuth}
       />
 
       <main className="flex-1">
@@ -660,12 +700,22 @@ function AppContent() {
         orders={orderHistory}
         onTrackOrder={handleTrackOrderFromProfile}
         onReorder={handleReorderFromProfile}
+        currentUser={currentUser}
+        onSignOut={handleSignOut}
       />
 
       <ShareModal
         isOpen={isShareOpen}
         onClose={() => setIsShareOpen(false)}
         onNotifyToast={showToast}
+      />
+
+      {/* Modern High-Converting Auth Flow Modal (Split-Screen & Zod Validation) */}
+      <AuthFlow
+        isOpen={isAuthOpen}
+        onClose={() => setIsAuthOpen(false)}
+        initialMode={authInitialMode}
+        onAuthSuccess={handleAuthSuccess}
       />
     </div>
   );
