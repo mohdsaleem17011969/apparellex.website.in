@@ -25,6 +25,8 @@ export interface OrderDetails {
   phone: string;
   address: string;
   postalCode: string;
+  city?: string;
+  coordinates?: { lat: number; lng: number };
   paymentMethod: 'cod' | 'card' | 'upi';
   totalAmount: number;
   items: CartItem[];

@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
 import { CartItem } from '../data/products';
-import { X, Clock, Zap, User, Phone, Home, CreditCard, Banknote, AlertCircle, Award } from 'lucide-react';
+import { X, Clock, Zap, User, Phone, Home, CreditCard, Banknote, AlertCircle, Award, CheckCircle2 } from 'lucide-react';
 import { OrderTracker, OrderDetails } from './OrderTracker';
 import { ConfettiCanvas } from './ConfettiCanvas';
+import { PlaceAddressAutocomplete, ParsedAddress } from './PlaceAddressAutocomplete';
 import {
   LoyaltyTracker,
   getSavedLoyaltyAccount,
@@ -32,8 +33,13 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
   const [step, setStep] = useState<'details' | 'tracking'>(existingOrder ? 'tracking' : 'details');
   const [name, setName] = useState('');
   const [phone, setPhone] = useState('');
-  const [address, setAddress] = useState('');
-  const [postalCode, setPostalCode] = useState('10001');
+  const [address, setAddress] = useState(existingOrder?.address || '');
+  const [city, setCity] = useState(existingOrder?.city || 'New York');
+  const [postalCode, setPostalCode] = useState(existingOrder?.postalCode || '10001');
+  const [coordinates, setCoordinates] = useState<{ lat: number; lng: number } | undefined>(
+    existingOrder?.coordinates || undefined
+  );
+  const [isAddressAutocompleted, setIsAddressAutocompleted] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState<'cod' | 'card' | 'upi'>('cod');
   const [confirmedOrder, setConfirmedOrder] = useState<OrderDetails | null>(existingOrder || null);
   const [showConfetti, setShowConfetti] = useState(false);
@@ -52,6 +58,20 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
     setPointsDiscount(discount);
   };
 
+  const handleAddressSelect = (parsed: ParsedAddress) => {
+    setAddress(parsed.street || parsed.formattedAddress);
+    if (parsed.city) setCity(parsed.city);
+    if (parsed.postalCode) setPostalCode(parsed.postalCode);
+    if (parsed.location) {
+      setCoordinates(parsed.location);
+    } else {
+      // Default nearby Manhattan coords if location object missing
+      setCoordinates({ lat: 40.7505, lng: -73.9934 });
+    }
+    setIsAddressAutocompleted(true);
+    setFormError(null);
+  };
+
   const handleSubmitOrder = (e: React.FormEvent) => {
     e.preventDefault();
     setFormError(null);
@@ -67,7 +87,9 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
       name: name.trim(),
       phone: phone.trim(),
       address: address.trim(),
+      city: city.trim() || 'New York',
       postalCode: postalCode.trim() || '10001',
+      coordinates: coordinates || { lat: 40.7505, lng: -73.9934 },
       paymentMethod,
       totalAmount: finalTotal,
       items: [...items],
@@ -256,25 +278,44 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
                 </div>
               </div>
 
-              {/* Delivery Address */}
+              {/* Delivery Address with Google Places Autocomplete */}
               <div className="space-y-4">
-                <h3 className="text-xs font-bold uppercase tracking-widest text-[#1a1a1a] flex items-center gap-1.5 border-b border-black/10 pb-2">
-                  <Home className="w-3.5 h-3.5 text-[#FF5757]" />
-                  <span>2. Delivery Address</span>
-                </h3>
+                <div className="flex items-center justify-between border-b border-black/10 pb-2">
+                  <h3 className="text-xs font-bold uppercase tracking-widest text-[#1a1a1a] flex items-center gap-1.5">
+                    <Home className="w-3.5 h-3.5 text-[#FF5757]" />
+                    <span>2. Delivery Address</span>
+                  </h3>
+                  <span className="text-[10px] text-black/50 font-bold uppercase tracking-wider flex items-center gap-1">
+                    <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                    Google Places Autocomplete
+                  </span>
+                </div>
 
                 <div>
-                  <label className="block text-[11px] font-bold uppercase tracking-wider text-black/70 mb-1">
-                    Street Address & Apartment / Suite *
-                  </label>
-                  <input
-                    type="text"
-                    required
+                  <div className="flex items-center justify-between mb-1">
+                    <label className="block text-[11px] font-bold uppercase tracking-wider text-black/70">
+                      Street Address & Apartment / Suite *
+                    </label>
+                    {isAddressAutocompleted && (
+                      <span className="text-[10px] text-emerald-700 font-bold flex items-center gap-1">
+                        <CheckCircle2 className="w-3 h-3 text-emerald-600" />
+                        Verified via Google Maps
+                      </span>
+                    )}
+                  </div>
+                  <PlaceAddressAutocomplete
                     value={address}
-                    onChange={(e) => setAddress(e.target.value)}
-                    placeholder="e.g. 742 Evergreen Terrace, Apt 4B"
-                    className="w-full text-xs p-3 border border-black/20 rounded-sm bg-white focus:border-[#FF5757] outline-none"
+                    onChange={(val) => {
+                      setAddress(val);
+                      if (isAddressAutocompleted) setIsAddressAutocompleted(false);
+                    }}
+                    onAddressSelect={handleAddressSelect}
+                    placeholder="Search street, building, apartment, or landmark..."
+                    required
                   />
+                  <p className="text-[10px] text-black/50 mt-1.5">
+                    Start typing to pick verified delivery addresses. City and postal code auto-populate instantly.
+                  </p>
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
@@ -284,9 +325,10 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
                     </label>
                     <input
                       type="text"
-                      defaultValue="Metro Center"
-                      className="w-full text-xs p-3 border border-black/20 rounded-sm bg-[#F5F5F5] text-black/70 outline-none"
-                      readOnly
+                      value={city}
+                      onChange={(e) => setCity(e.target.value)}
+                      placeholder="e.g. New York"
+                      className="w-full text-xs p-3 border border-black/20 rounded-sm bg-white focus:border-[#FF5757] outline-none"
                     />
                   </div>
                   <div>
@@ -297,6 +339,7 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
                       type="text"
                       value={postalCode}
                       onChange={(e) => setPostalCode(e.target.value)}
+                      placeholder="e.g. 10001"
                       className="w-full text-xs p-3 border border-black/20 rounded-sm bg-white focus:border-[#FF5757] outline-none"
                     />
                   </div>

@@ -86,11 +86,37 @@ const getSavedSettings = (): SiteSettings => {
 
 const INITIAL_PAST_ORDERS: PastOrderRecord[] = [
   {
+    orderId: 'APX-954128',
+    name: 'Shaikh Kamran',
+    phone: '+1 (555) 019-2834',
+    address: '450 West 33rd Street, Hudson Yards',
+    city: 'New York',
+    postalCode: '10001',
+    coordinates: { lat: 40.7535, lng: -73.9995 },
+    paymentMethod: 'card',
+    totalAmount: 180,
+    formattedDate: 'Active Now · Live Dispatch',
+    statusText: 'In Transit (8 Mins ETA)',
+    statusType: 'in_transit',
+    deliveredInMinutes: 8,
+    createdAt: new Date(),
+    items: [
+      {
+        product: PRODUCTS[2],
+        selectedSize: 'L',
+        selectedColor: PRODUCTS[2].colors[0],
+        quantity: 1,
+      },
+    ],
+  },
+  {
     orderId: 'APX-928104',
     name: 'Shaikh Kamran',
     phone: '+1 (555) 019-2834',
     address: '742 Evergreen Terrace, Apt 4B',
+    city: 'New York',
     postalCode: '10001',
+    coordinates: { lat: 40.7505, lng: -73.9934 },
     paymentMethod: 'card',
     totalAmount: 245,
     formattedDate: 'Sep 28, 2026 · 04:15 PM',

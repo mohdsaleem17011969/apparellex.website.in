@@ -16,10 +16,14 @@ import {
   CreditCard,
   ShoppingBag,
   Sparkles,
-  Star
+  Star,
+  Navigation,
+  ChevronDown,
+  ChevronUp,
 } from 'lucide-react';
 import { CartItem } from '../data/products';
 import { LoyaltyTracker } from './LoyaltyTracker';
+import { LiveOrderRouteMap } from './LiveOrderRouteMap';
 
 export interface PastOrderRecord extends OrderDetails {
   statusText: string;
@@ -59,6 +63,7 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
 
   const [activeTab, setActiveTab] = useState<'orders' | 'addresses' | 'vip'>('orders');
   const [filterStatus, setFilterStatus] = useState<'all' | 'delivered' | 'in_transit'>('all');
+  const [expandedRouteId, setExpandedRouteId] = useState<string | null>(null);
 
   const filteredOrders = orders.filter((ord) => {
     if (filterStatus === 'all') return true;
@@ -353,7 +358,32 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
                           </div>
 
                           {/* Action Buttons */}
-                          <div className="flex items-center gap-2.5">
+                          <div className="flex flex-wrap items-center gap-2">
+                            {isInTransit && (
+                              <button
+                                type="button"
+                                onClick={() =>
+                                  setExpandedRouteId((prev) =>
+                                    prev === orderRecord.orderId ? null : orderRecord.orderId
+                                  )
+                                }
+                                className={`px-3 py-2 border rounded-sm text-xs font-bold uppercase tracking-wider flex items-center gap-1.5 transition cursor-pointer ${
+                                  expandedRouteId === orderRecord.orderId
+                                    ? 'bg-[#111111] text-white border-[#111111]'
+                                    : 'bg-[#FAF8F2] hover:bg-[#111111] hover:text-white border-black/20 text-[#1a1a1a]'
+                                }`}
+                                title="Toggle live Google Maps route from warehouse to address"
+                              >
+                                <Navigation className="w-3.5 h-3.5 text-[#FF5757]" />
+                                <span>{expandedRouteId === orderRecord.orderId ? 'Hide Map Route' : 'Preview Route'}</span>
+                                {expandedRouteId === orderRecord.orderId ? (
+                                  <ChevronUp className="w-3.5 h-3.5" />
+                                ) : (
+                                  <ChevronDown className="w-3.5 h-3.5" />
+                                )}
+                              </button>
+                            )}
+
                             {onOpenFeedback && (orderRecord.statusType === 'delivered' || orderRecord.statusType === 'try_on_kept') && (
                               <button
                                 onClick={() => {
@@ -373,11 +403,24 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
                                 onTrackOrder(orderRecord);
                                 onClose();
                               }}
-                              className="px-3.5 py-2 bg-[#1a1a1a] hover:bg-[#FF5757] text-white rounded-sm text-xs font-bold uppercase tracking-wider flex items-center gap-1.5 transition cursor-pointer"
+                              className={`px-3.5 py-2 text-white rounded-sm text-xs font-bold uppercase tracking-wider flex items-center gap-1.5 transition cursor-pointer ${
+                                isInTransit
+                                  ? 'bg-[#FF5757] hover:bg-[#e04545] shadow-sm animate-pulse'
+                                  : 'bg-[#1a1a1a] hover:bg-[#FF5757]'
+                              }`}
                               title="View full tracking radar or receipt"
                             >
-                              <Clock className="w-3.5 h-3.5" />
-                              <span>View Tracker</span>
+                              {isInTransit ? (
+                                <>
+                                  <Bike className="w-3.5 h-3.5" />
+                                  <span>Track Live Route</span>
+                                </>
+                              ) : (
+                                <>
+                                  <Clock className="w-3.5 h-3.5" />
+                                  <span>View Tracker</span>
+                                </>
+                              )}
                             </button>
 
                             <button
@@ -393,6 +436,16 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
                             </button>
                           </div>
                         </div>
+
+                        {/* Inline Google Maps Route Visualizer for In-Transit Orders */}
+                        {isInTransit && expandedRouteId === orderRecord.orderId && (
+                          <div className="pt-3 border-t border-black/10 animate-fadeIn">
+                            <LiveOrderRouteMap
+                              order={orderRecord}
+                              secondsRemaining={380}
+                            />
+                          </div>
+                        )}
                       </article>
                     );
                   })}
