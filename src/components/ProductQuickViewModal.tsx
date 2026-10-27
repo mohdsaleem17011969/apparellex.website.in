@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Product } from '../data/products';
-import { X, Star, Zap, ShieldCheck, RefreshCw, ShoppingBag, Heart, Ruler, ArrowLeftRight } from 'lucide-react';
+import { X, Star, Zap, ShieldCheck, RefreshCw, ShoppingBag, Heart, Ruler, ArrowLeftRight, Sparkles } from 'lucide-react';
 
 interface ProductQuickViewModalProps {
   product: Product | null;
@@ -10,6 +10,7 @@ interface ProductQuickViewModalProps {
   onToggleWishlist: (productId: string) => void;
   onOpenFitAssistant?: () => void;
   onOpenCompare?: (product: Product) => void;
+  onOpenAiSuggestions?: (product: Product) => void;
 }
 
 export const ProductQuickViewModal: React.FC<ProductQuickViewModalProps> = ({
@@ -20,6 +21,7 @@ export const ProductQuickViewModal: React.FC<ProductQuickViewModalProps> = ({
   onToggleWishlist,
   onOpenFitAssistant,
   onOpenCompare,
+  onOpenAiSuggestions,
 }) => {
   if (!product) return null;
 
@@ -200,6 +202,20 @@ export const ProductQuickViewModal: React.FC<ProductQuickViewModalProps> = ({
 
           {/* Action Module */}
           <div className="pt-4 border-t border-black/10">
+            {onOpenAiSuggestions && (
+              <button
+                onClick={() => {
+                  onClose();
+                  onOpenAiSuggestions(product);
+                }}
+                className="w-full mb-2.5 py-2 px-3 border border-[#FF5757]/40 bg-[#FAF8F2] hover:bg-[#111111] hover:text-white rounded-sm text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-1.5 transition text-black cursor-pointer shadow-xs"
+                title="Generate matching AI outfits with this piece"
+              >
+                <Sparkles className="w-3.5 h-3.5 text-[#FF5757] fill-[#FF5757]" />
+                <span>AI Suggestions: Complete Look</span>
+              </button>
+            )}
+
             {onOpenCompare && (
               <button
                 onClick={() => {

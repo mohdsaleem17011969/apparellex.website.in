@@ -5,12 +5,14 @@ interface HeroProps {
   onShopMen: () => void;
   onShopWomen: () => void;
   onOpenDeliveryChecker: () => void;
+  onOpenAiSuggestions?: () => void;
 }
 
 export const Hero: React.FC<HeroProps> = ({
   onShopMen,
   onShopWomen,
   onOpenDeliveryChecker,
+  onOpenAiSuggestions,
 }) => {
   const [bgFailed, setBgFailed] = useState(false);
   const heroImageUrl =
@@ -74,6 +76,15 @@ export const Hero: React.FC<HeroProps> = ({
           >
             SHOP WOMEN
           </button>
+          {onOpenAiSuggestions && (
+            <button
+              onClick={onOpenAiSuggestions}
+              className="w-full sm:w-auto bg-[#FF5757] hover:bg-white hover:text-black text-white px-7 py-4 font-bold text-sm uppercase tracking-wider rounded-sm transition-all duration-200 cursor-pointer shadow-xl active:scale-95 flex items-center justify-center gap-2"
+            >
+              <Sparkles className="w-4 h-4 fill-current" />
+              <span>AI Suggestions</span>
+            </button>
+          )}
         </div>
 
         {/* Live Postal Checker Quick Affordance */}

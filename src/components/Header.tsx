@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { ShoppingBag, Search, Heart, X, Zap, User, Share2 } from 'lucide-react';
+import { ShoppingBag, Search, Heart, X, Zap, User, Share2, Sparkles } from 'lucide-react';
 import { Product, PRODUCTS } from '../data/products';
 import { TrendingSearchesDropdown } from './TrendingSearchesDropdown';
 import { SiteSettings } from '../data/siteSettings';
@@ -20,6 +20,7 @@ interface HeaderProps {
   settings?: SiteSettings;
   currentUser?: { name: string; email: string; avatar?: string; isVip?: boolean } | null;
   onOpenAuth?: (mode?: 'login' | 'signup') => void;
+  onOpenAiSuggestions?: () => void;
 }
 
 export const Header: React.FC<HeaderProps> = ({
@@ -38,6 +39,7 @@ export const Header: React.FC<HeaderProps> = ({
   settings,
   currentUser,
   onOpenAuth,
+  onOpenAiSuggestions,
 }) => {
   const [showSearch, setShowSearch] = useState(false);
   const [showBanner, setShowBanner] = useState(true);
@@ -130,6 +132,15 @@ export const Header: React.FC<HeaderProps> = ({
             <a href="#vault" className="hover:text-[#FF5757] transition-colors">
               VIP Vault
             </a>
+            {onOpenAiSuggestions && (
+              <button
+                onClick={onOpenAiSuggestions}
+                className="hover:text-[#FF5757] transition-colors uppercase tracking-widest cursor-pointer inline-flex items-center gap-1 text-[#FF5757]"
+              >
+                <Sparkles className="w-3.5 h-3.5 fill-[#FF5757]" />
+                <span>AI Stylist</span>
+              </button>
+            )}
             <button
               onClick={onOpenDeliveryChecker}
               className="hover:text-[#FF5757] transition-colors uppercase tracking-widest cursor-pointer inline-flex items-center gap-1"
@@ -150,6 +161,18 @@ export const Header: React.FC<HeaderProps> = ({
 
           {/* Zone 3: Functional interactive affordances */}
           <div className="flex items-center space-x-2 sm:space-x-3 md:space-x-4">
+            {/* AI Suggestions Quick Action Button */}
+            {onOpenAiSuggestions && (
+              <button
+                onClick={onOpenAiSuggestions}
+                className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 bg-[#111111] hover:bg-[#FF5757] text-white text-[11px] font-bold uppercase tracking-wider rounded-sm shadow-sm transition cursor-pointer"
+                title="Open AI Suggestions & Style Concierge"
+              >
+                <Sparkles className="w-3.5 h-3.5 text-[#FF5757] fill-[#FF5757]" />
+                <span>AI Suggestions</span>
+              </button>
+            )}
+
             {/* Search Trigger */}
             <button
               onClick={handleToggleSearch}

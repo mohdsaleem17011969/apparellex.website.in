@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
+import gsap from 'gsap';
 import { CartItem } from '../data/products';
 import {
   CheckCircle2,
@@ -93,6 +94,80 @@ export const OrderTracker: React.FC<OrderTrackerProps> = ({
   const [isPaused, setIsPaused] = useState(false);
   const [hasPromptedFeedback, setHasPromptedFeedback] = useState(false);
 
+  const trackerRootRef = useRef<HTMLDivElement>(null);
+
+  // Smooth GSAP entrance animation when the Active Delivery Tracker first appears
+  useEffect(() => {
+    const ctx = gsap.context(() => {
+      const tl = gsap.timeline({ defaults: { ease: 'power3.out' } });
+
+      // 1. Top banner drops in smoothly with momentum
+      tl.from('.tracker-banner', {
+        y: -35,
+        opacity: 0,
+        duration: 0.7,
+      })
+      // 2. 10-Minute Guaranteed delivery timer springs into view with high-energy pop
+      .from('.tracker-timer', {
+        scale: 0.72,
+        opacity: 0,
+        rotation: -3,
+        duration: 0.75,
+        ease: 'back.out(1.8)',
+      }, '-=0.45')
+      // 3. 10-Minute promise radar badge glides into position
+      .from('.tracker-promise-pill', {
+        x: -25,
+        opacity: 0,
+        duration: 0.5,
+        ease: 'power2.out',
+      }, '-=0.5')
+      // 4. Progress bar section rises up
+      .from('.tracker-progress-card', {
+        y: 25,
+        opacity: 0,
+        duration: 0.65,
+      }, '-=0.35')
+      // 5. Staggered 4 milestone stage cards
+      .from('.tracker-stage-item', {
+        y: 20,
+        opacity: 0,
+        scale: 0.95,
+        stagger: 0.08,
+        duration: 0.45,
+        ease: 'power2.out',
+      }, '-=0.3')
+      // 6. Live Google Maps dispatch radar container expands into view
+      .from('.tracker-map-wrapper', {
+        opacity: 0,
+        y: 20,
+        scale: 0.98,
+        duration: 0.7,
+        ease: 'power2.out',
+      }, '-=0.25')
+      // 7. Bottom courier and service guarantee details cards
+      .from('.tracker-info-box', {
+        y: 25,
+        opacity: 0,
+        stagger: 0.1,
+        duration: 0.55,
+        ease: 'power2.out',
+      }, '-=0.3');
+
+      // Continuous subtle ambient glow pulsing on the 10-minute timer badge
+      gsap.to('.tracker-timer-glow', {
+        opacity: 0.5,
+        scale: 1.05,
+        repeat: -1,
+        yoyo: true,
+        duration: 1.4,
+        ease: 'sine.inOut',
+      });
+    }, trackerRootRef);
+
+    return () => ctx.revert();
+  }, []);
+
   // Compute stage index (0 to 3) based on seconds remaining
   // Total 600s:
   // 600s - 540s (1 min elapsed): received (0)
@@ -153,13 +228,13 @@ export const OrderTracker: React.FC<OrderTrackerProps> = ({
   };
 
   return (
-    <div className="w-full flex flex-col space-y-6 animate-fadeIn">
+    <div ref={trackerRootRef} className="w-full flex flex-col space-y-6">
       {/* Top Banner Status */}
-      <div className="bg-[#111111] text-white p-6 rounded-sm border border-white/10 flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <div className="tracker-banner bg-[#111111] text-white p-6 rounded-sm border border-white/10 flex flex-col md:flex-row md:items-center justify-between gap-4 shadow-sm">
         <div>
           <div className="flex items-center gap-2 mb-1">
             <span className="w-2 h-2 rounded-full bg-[#FF5757] animate-ping" />
-            <span className="text-[11px] font-bold uppercase tracking-widest text-[#FF5757]">
+            <span className="tracker-promise-pill text-[11px] font-bold uppercase tracking-widest text-[#FF5757]">
               Live 10-Minute Hyperlocal Radar
             </span>
             <span className="text-white/40">·</span>
@@ -185,16 +260,18 @@ export const OrderTracker: React.FC<OrderTrackerProps> = ({
           </p>
         </div>
 
-        {/* Live Timer Display */}
-        <div className="bg-black/60 border border-white/15 px-6 py-4 rounded-sm flex flex-col items-center justify-center shrink-0 min-w-[170px]">
-          <span className="text-[10px] uppercase font-bold tracking-widest text-white/60 mb-0.5 flex items-center gap-1">
+        {/* Live Timer Display with GSAP Entrance & Glow */}
+        <div className="tracker-timer relative overflow-hidden bg-black/75 border border-white/20 px-6 py-4 rounded-sm flex flex-col items-center justify-center shrink-0 min-w-[170px] shadow-lg">
+          <span className="tracker-timer-glow absolute inset-0 bg-[#FF5757]/15 rounded-sm pointer-events-none" />
+          <span className="text-[10px] uppercase font-bold tracking-widest text-white/70 mb-0.5 flex items-center gap-1 relative z-10">
             <Clock className="w-3 h-3 text-[#FF5757]" />
             Time to Doorstep
           </span>
-          <span className="text-4xl sm:text-5xl font-black font-fashion text-[#FF5757] tabular-nums tracking-wider">
+          <span className="text-4xl sm:text-5xl font-black font-fashion text-[#FF5757] tabular-nums tracking-wider relative z-10 drop-shadow">
             {formatTimer(secondsRemaining)}
           </span>
-          <span className="text-[10px] text-white/50 mt-1 uppercase font-semibold">
+          <span className="text-[10px] text-white/60 mt-1 uppercase font-semibold relative z-10 flex items-center gap-1">
+            <Zap className="w-3 h-3 text-[#FF5757] fill-[#FF5757]" />
             {secondsRemaining === 0 ? 'Delivered' : 'Guaranteed 10m SLA'}
           </span>
         </div>
@@ -233,7 +310,7 @@ export const OrderTracker: React.FC<OrderTrackerProps> = ({
       )}
 
       {/* Real-Time Progress Bar & Milestones Section */}
-      <div className="bg-[#FAF8F2] border border-black/10 p-6 md:p-8 rounded-sm">
+      <div className="tracker-progress-card bg-[#FAF8F2] border border-black/10 p-6 md:p-8 rounded-sm shadow-xs">
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-2">
             <Zap className="w-4 h-4 text-[#FF5757] fill-[#FF5757]" />
@@ -340,7 +417,7 @@ export const OrderTracker: React.FC<OrderTrackerProps> = ({
             return (
               <div
                 key={st.key}
-                className={`p-3.5 rounded-sm border transition-all ${
+                className={`tracker-stage-item p-3.5 rounded-sm border transition-all ${
                   isCurrent
                     ? 'bg-white border-[#FF5757] shadow-sm'
                     : isPast
@@ -384,13 +461,50 @@ export const OrderTracker: React.FC<OrderTrackerProps> = ({
         </div>
       </div>
 
-      {/* Live Google Maps GPS Courier Radar & Route Navigation */}
-      <LiveOrderRouteMap order={order} secondsRemaining={secondsRemaining} />
+      {/* Live Google Maps GPS Courier Radar & Route Navigation with GSAP Wrapper */}
+      <div className="tracker-map-wrapper">
+        <LiveOrderRouteMap order={order} secondsRemaining={secondsRemaining} />
+      </div>
 
       {/* Courier & Dark Store Dispatch Information */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {/* Courier Profile */}
-        <div className="bg-white border border-black/10 p-5 rounded-sm flex flex-col justify-between">
+        <div className="tracker-info-box bg-white border border-black/10 p-5 rounded-sm flex flex-col justify-between shadow-xs">
+          <div>
+            <div className="flex items-center justify-between text-xs text-black/50 uppercase tracking-widest font-semibold mb-3">
+              <span>Electric Courier</span>
+              <span className="text-emerald-700 font-bold">Active SLA</span>
+            </div>
+
+            <div className="flex items-center gap-3">
+              <div className="w-12 h-12 rounded-full bg-[#1a1a1a] text-white flex items-center justify-center text-lg font-black font-fashion">
+                TM
+              </div>
+              <div>
+                <h4 className="text-sm font-bold text-black">Tariq M.</h4>
+                <p className="text-xs text-black/60">Dedicated Apparellex Rider</p>
+                <div className="flex items-center gap-1.5 text-[11px] text-black/50 mt-0.5">
+                  <Bike className="w-3.5 h-3.5 text-[#FF5757]" />
+                  <span>Super73 RX Electric Cargo</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="mt-4 pt-4 border-t border-black/10 flex items-center justify-between">
+            <span className="text-[11px] text-black/60">Direct GPS route active</span>
+            <a
+              href={`tel:${order.phone}`}
+              className="inline-flex items-center gap-1.5 text-xs font-bold text-[#FF5757] hover:underline"
+            >
+              <PhoneCall className="w-3.5 h-3.5" />
+              <span>Contact Courier</span>
+            </a>
+          </div>
+        </div>
+
+        {/* Doorstep Try-On Guarantee */}
+        <div className="tracker-info-box bg-white border border-black/10 p-5 rounded-sm flex flex-col justify-between shadow-xs">
           <div>
             <div className="flex items-center justify-between text-xs text-black/50 uppercase tracking-widest font-semibold mb-3">
               <span>Electric Courier</span>
@@ -450,7 +564,7 @@ export const OrderTracker: React.FC<OrderTrackerProps> = ({
         </div>
 
         {/* Delivery Address & Payment */}
-        <div className="bg-white border border-black/10 p-5 rounded-sm flex flex-col justify-between">
+        <div className="tracker-info-box bg-white border border-black/10 p-5 rounded-sm flex flex-col justify-between shadow-xs">
           <div>
             <div className="flex items-center justify-between text-xs text-black/50 uppercase tracking-widest font-semibold mb-3">
               <span>Dispatch Address</span>

@@ -4,6 +4,7 @@ import { Sparkles, ShoppingBag, Zap, Check, ArrowRight, Layers } from 'lucide-re
 
 interface OutfitBuilderProps {
   onAddOutfitToBag: (items: { product: Product; size: string; color: { name: string; hex: string } }[]) => void;
+  onOpenAiSuggestions?: () => void;
 }
 
 interface CuratedLook {
@@ -50,7 +51,7 @@ const CURATED_LOOKS: CuratedLook[] = [
   },
 ];
 
-export const OutfitBuilder: React.FC<OutfitBuilderProps> = ({ onAddOutfitToBag }) => {
+export const OutfitBuilder: React.FC<OutfitBuilderProps> = ({ onAddOutfitToBag, onOpenAiSuggestions }) => {
   const [selectedLookId, setSelectedLookId] = useState(CURATED_LOOKS[0].id);
 
   const activeLook = CURATED_LOOKS.find((l) => l.id === selectedLookId) || CURATED_LOOKS[0];
@@ -92,7 +93,7 @@ export const OutfitBuilder: React.FC<OutfitBuilderProps> = ({ onAddOutfitToBag }
             </p>
           </div>
 
-          {/* Look Preset Selector */}
+          {/* Look Preset Selector + AI Formulation */}
           <div className="flex flex-wrap items-center gap-2">
             {CURATED_LOOKS.map((look) => (
               <button
@@ -107,6 +108,17 @@ export const OutfitBuilder: React.FC<OutfitBuilderProps> = ({ onAddOutfitToBag }
                 {look.name}
               </button>
             ))}
+
+            {onOpenAiSuggestions && (
+              <button
+                onClick={onOpenAiSuggestions}
+                className="px-4 py-2.5 text-xs font-bold uppercase tracking-wider rounded-sm transition-all cursor-pointer bg-gradient-to-r from-[#FF5757] to-[#e04545] text-white flex items-center gap-1.5 shadow-lg hover:brightness-110 active:scale-95"
+                title="Ask Gemini AI for custom styling formulas"
+              >
+                <Sparkles className="w-3.5 h-3.5 fill-white" />
+                <span>Custom AI Look</span>
+              </button>
+            )}
           </div>
         </div>
 

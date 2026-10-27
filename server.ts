@@ -7,15 +7,32 @@ import path from 'node:path';
 import fs from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import db, { cryptoRandomId } from './server/db.js';
+import {
+  generateOutfitSuggestions,
+  generateFitSuggestions,
+  generateTrendSuggestions,
+  generateSmartSearch,
+} from './server/geminiService.js';
 
 dotenv.config();
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
+// Port determination: In AI Studio Dev, Nginx proxies 8080 to 3000, so dev must listen on 3000.
+// In Cloud Run production, Cloud Run forwards directly to process.env.PORT (defaults to 8080).
 const isProduction = process.env.NODE_ENV === 'production';
-const PORT = Number(process.env.PORT) || (isProduction ? 8080 : 3000);
+const isDev = !isProduction && process.env.DISABLE_HMR === 'true';
+const PORT = isDev ? 3000 : (Number(process.env.PORT) || 8080);
 const JWT_SECRET = process.env.JWT_SECRET || 'apparellex_super_secret_jwt_key_2026';
+
+process.on('unhandledRejection', (reason, promise) => {
+  console.warn('Unhandled Rejection at:', promise, 'reason:', reason);
+});
+
+process.on('uncaughtException', (err) => {
+  console.error('Uncaught Exception caught:', err);
+});
 
 async function startServer() {
   const app = express();
@@ -24,15 +41,19 @@ async function startServer() {
   app.use(express.json());
 
   // -------------------------------------------------------------
-  // API Routes
+  // Health Check Routes (Probes for Cloud Run & Monitoring)
   // -------------------------------------------------------------
-
-  // Health check endpoint for Cloud Run and monitoring
-  app.get('/api/health', (req, res) => {
-    res.json({ status: 'ok', timestamp: new Date().toISOString() });
+  app.get('/healthz', (_req, res) => {
+    res.status(200).send('OK');
   });
 
-  // Auth Login endpoint
+  app.get('/api/health', (_req, res) => {
+    res.status(200).json({ status: 'ok', timestamp: new Date().toISOString() });
+  });
+
+  // -------------------------------------------------------------
+  // Auth API
+  // -------------------------------------------------------------
   app.post('/api/auth/login', (req, res) => {
     const { email, password } = req.body;
     if (!email || !password) {
@@ -69,11 +90,13 @@ async function startServer() {
     }
   });
 
+  // -------------------------------------------------------------
   // Products API
-  app.get('/api/products', (req, res) => {
+  // -------------------------------------------------------------
+  app.get('/api/products', (_req, res) => {
     try {
       const products = db.prepare('SELECT * FROM products ORDER BY created_at DESC').all() as any[];
-      const formatted = products.map((p) => ({
+      const formatted = (products || []).map((p) => ({
         ...p,
         sizes: p.sizes ? JSON.parse(p.sizes) : [],
         colors: p.colors ? JSON.parse(p.colors) : [],
@@ -88,8 +111,10 @@ async function startServer() {
     }
   });
 
+  // -------------------------------------------------------------
   // Site Settings API
-  app.get('/api/settings', (req, res) => {
+  // -------------------------------------------------------------
+  app.get('/api/settings', (_req, res) => {
     try {
       const settings = db.prepare('SELECT * FROM site_settings LIMIT 1').get() as any;
       if (!settings) {
@@ -159,35 +184,118 @@ async function startServer() {
   });
 
   // -------------------------------------------------------------
-  // Frontend Serving (Dev Vite Middleware vs Production Static)
+  // Gemini AI Suggestion Routes
+  // -------------------------------------------------------------
+
+  // 1. AI Outfit Suggestions
+  app.post('/api/ai/outfit-suggestions', async (req, res) => {
+    try {
+      const { productContext, occasion, gender, catalog } = req.body;
+      const suggestions = await generateOutfitSuggestions(
+        productContext || 'Urban Streetwear Statement',
+        occasion || 'Metropolitan Evening',
+        gender || 'unisex',
+        Array.isArray(catalog) ? catalog : []
+      );
+      res.json(suggestions);
+    } catch (err: any) {
+      res.status(500).json({ error: 'Failed to generate outfit suggestions', details: err?.message });
+    }
+  });
+
+  // 2. AI Fit & Tailoring Suggestions
+  app.post('/api/ai/fit-suggestions', async (req, res) => {
+    try {
+      const { productName, productFit, height, weight, bodyType, preferredDrape } = req.body;
+      const suggestions = await generateFitSuggestions(
+        productName || 'Garment',
+        productFit || 'Regular Fit',
+        height || "5'10\"",
+        weight || '165 lbs',
+        bodyType || 'Athletic',
+        preferredDrape || 'Relaxed Everyday'
+      );
+      res.json(suggestions);
+    } catch (err: any) {
+      res.status(500).json({ error: 'Failed to generate fit suggestions', details: err?.message });
+    }
+  });
+
+  // 3. AI Hyperlocal Trend Suggestions
+  app.post('/api/ai/trend-suggestions', async (req, res) => {
+    try {
+      const { vibe, catalog } = req.body;
+      const trends = await generateTrendSuggestions(
+        vibe || 'SoHo & Downtown NYC',
+        Array.isArray(catalog) ? catalog : []
+      );
+      res.json(trends);
+    } catch (err: any) {
+      res.status(500).json({ error: 'Failed to generate trend suggestions', details: err?.message });
+    }
+  });
+
+  // 4. AI Smart Search Suggestions
+  app.post('/api/ai/smart-search', async (req, res) => {
+    try {
+      const { query, catalog } = req.body;
+      if (!query) {
+        return res.status(400).json({ error: 'Search query is required' });
+      }
+      const searchResult = await generateSmartSearch(
+        query,
+        Array.isArray(catalog) ? catalog : []
+      );
+      res.json(searchResult);
+    } catch (err: any) {
+      res.status(500).json({ error: 'Failed to execute smart search', details: err?.message });
+    }
+  });
+
+  // -------------------------------------------------------------
+  // Frontend Serving (Production Static vs Development Middleware)
   // -------------------------------------------------------------
   const distPath = path.resolve(__dirname, 'dist');
   const distExists = fs.existsSync(distPath);
 
-  if (!isProduction && !distExists) {
-    // Development mode with Vite middlewares
-    const { createServer } = await import('vite');
-    const vite = await createServer({
-      server: {
-        middlewareMode: true,
-      },
-      appType: 'spa',
-    });
-
-    app.use(vite.middlewares);
-  } else {
-    // Production mode: Serve pre-built static assets from dist
+  if (distExists) {
+    // In production or built environment, serve static files directly from dist
     app.use(express.static(distPath));
 
-    app.get('*', (req, res) => {
+    app.get('*', (_req, res) => {
       const indexPath = path.join(distPath, 'index.html');
       if (fs.existsSync(indexPath)) {
         res.sendFile(indexPath);
       } else {
-        res.status(404).send('Application build not found. Please run npm run build.');
+        res.status(200).send('<!doctype html><html><head><title>Apparellex</title></head><body><div id="root"></div></body></html>');
       }
     });
+  } else if (!isProduction) {
+    // Development mode without pre-built dist: mount Vite middlewares
+    try {
+      const { createServer } = await import('vite');
+      const vite = await createServer({
+        server: {
+          middlewareMode: true,
+        },
+        appType: 'spa',
+      });
+      app.use(vite.middlewares);
+    } catch (e: any) {
+      console.warn('Vite middleware could not be loaded:', e?.message);
+    }
+  } else {
+    // Fallback if dist is missing in production
+    app.get('*', (_req, res) => {
+      res.status(200).send('<!doctype html><html><head><title>Apparellex</title></head><body><div id="root">Ready</div></body></html>');
+    });
   }
+
+  // Global error handler
+  app.use((err: any, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
+    console.error('Unhandled server error:', err);
+    res.status(500).json({ error: 'Internal server error', details: err?.message });
+  });
 
   // Bind to 0.0.0.0 and PORT for Cloud Run compatibility
   const server = app.listen(PORT, '0.0.0.0', () => {
@@ -206,6 +314,5 @@ async function startServer() {
 }
 
 startServer().catch((err) => {
-  console.error('Fatal server startup error:', err);
-  process.exit(1);
+  console.error('Fatal server startup error caught:', err);
 });

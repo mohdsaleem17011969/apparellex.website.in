@@ -25,6 +25,8 @@ import { AdminRouteGuard } from './components/AdminRouteGuard';
 import { SiteSettings, DEFAULT_SITE_SETTINGS } from './data/siteSettings';
 import { AuthFlow, AuthUser } from './components/AuthFlow';
 import { GoogleMapsWrapper } from './components/GoogleMapsWrapper';
+import { ActiveDeliveryTrackerWidget } from './components/ActiveDeliveryTrackerWidget';
+import { AiSuggestionsModal } from './components/AiSuggestionsModal';
 
 const STORAGE_KEY = 'apparellex-products-v1';
 const SETTINGS_STORAGE_KEY = 'apparellex-site-settings-v1';
@@ -213,6 +215,13 @@ function AppContent() {
   const [isAuthOpen, setIsAuthOpen] = useState(false);
   const [authInitialMode, setAuthInitialMode] = useState<'login' | 'signup'>('login');
   const [currentUser, setCurrentUser] = useState<AuthUser | null>(getSavedAuthUser);
+  const [isAiSuggestionsOpen, setIsAiSuggestionsOpen] = useState(false);
+  const [aiSuggestionInitialProduct, setAiSuggestionInitialProduct] = useState<Product | null>(null);
+
+  const handleOpenAiSuggestions = (prod?: Product) => {
+    setAiSuggestionInitialProduct(prod || null);
+    setIsAiSuggestionsOpen(true);
+  };
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -257,6 +266,7 @@ function AppContent() {
       setIsDeliveryCheckerOpen(false);
       setIsSizeAssistantOpen(false);
       setIsAuthOpen(false);
+      setIsAiSuggestionsOpen(false);
     };
 
     window.addEventListener('keydown', handleKeyDown);
@@ -550,6 +560,7 @@ function AppContent() {
         onOpenDeliveryChecker={() => setIsDeliveryCheckerOpen(true)}
         currentUser={currentUser}
         onOpenAuth={handleOpenAuth}
+        onOpenAiSuggestions={() => handleOpenAiSuggestions()}
       />
 
       <main className="flex-1">
@@ -557,6 +568,7 @@ function AppContent() {
           onShopMen={handleShopMen}
           onShopWomen={handleShopWomen}
           onOpenDeliveryChecker={() => setIsDeliveryCheckerOpen(true)}
+          onOpenAiSuggestions={() => handleOpenAiSuggestions()}
         />
 
         <DeliveryMarquee onOpenChecker={() => setIsDeliveryCheckerOpen(true)} />
@@ -606,7 +618,10 @@ function AppContent() {
           onAddToCart={handleAddToCart}
         />
 
-        <OutfitBuilder onAddOutfitToBag={handleAddOutfitToBag} />
+        <OutfitBuilder
+          onAddOutfitToBag={handleAddOutfitToBag}
+          onOpenAiSuggestions={() => handleOpenAiSuggestions()}
+        />
 
         <VipDropVault onNotifyToast={showToast} />
 
@@ -661,6 +676,7 @@ function AppContent() {
           setSizeAssistantProduct(quickViewProduct);
           setIsSizeAssistantOpen(true);
         }}
+        onOpenAiSuggestions={(prod) => handleOpenAiSuggestions(prod)}
       />
 
       <SizeAssistantModal
@@ -679,24 +695,10 @@ function AppContent() {
       />
 
       {activeOrder && !isCheckoutOpen && (
-        <aside
-          aria-label="Active delivery tracker shortcut"
-          className="fixed bottom-6 left-6 z-40 bg-[#111111] text-white px-4 py-3 rounded-sm shadow-2xl border border-[#FF5757]/40 flex items-center gap-3 backdrop-blur-md cursor-pointer hover:bg-[#1a1a1a]"
+        <ActiveDeliveryTrackerWidget
+          order={activeOrder}
           onClick={() => setIsCheckoutOpen(true)}
-        >
-          <div className="w-8 h-8 rounded-full bg-[#FF5757] flex items-center justify-center text-white shrink-0">
-            <Bike className="w-4 h-4" />
-          </div>
-          <div className="text-left pr-2">
-            <p className="text-[10px] uppercase font-bold tracking-wider text-[#FF5757] flex items-center gap-1">
-              <span className="w-1.5 h-1.5 rounded-full bg-[#FF5757] animate-pulse" />
-              10-Min Delivery in Progress
-            </p>
-            <p className="text-xs font-bold text-white">
-              Order #{activeOrder.orderId} · View Progress Bar
-            </p>
-          </div>
-        </aside>
+        />
       )}
 
       <DeliveryCheckerModal
@@ -743,6 +745,20 @@ function AppContent() {
         onClose={() => setIsAuthOpen(false)}
         initialMode={authInitialMode}
         onAuthSuccess={handleAuthSuccess}
+      />
+
+      {/* AI Suggestions Modal: Complete Look, Tailor Fit, NYC Trends, NL Wardrobe Finder */}
+      <AiSuggestionsModal
+        isOpen={isAiSuggestionsOpen}
+        onClose={() => setIsAiSuggestionsOpen(false)}
+        products={products}
+        initialProduct={aiSuggestionInitialProduct}
+        onAddToCart={handleAddToCart}
+        onAddMultipleToCart={(items) => {
+          items.forEach((item) => handleAddToCart(item.product, item.size, item.color, 1));
+          showToast(`Added ${items.length} AI ensemble pieces to your bag`);
+        }}
+        onOpenQuickView={(prod) => setQuickViewProduct(prod)}
       />
     </div>
   );
