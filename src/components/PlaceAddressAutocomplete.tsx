@@ -67,7 +67,7 @@ export const PlaceAddressAutocomplete: React.FC<PlaceAddressAutocompleteProps> =
     const request: google.maps.places.AutocompleteRequest = {
       input: value,
       sessionToken: sessionTokenRef.current,
-      region: 'us',
+      region: 'in',
     };
 
     let isMounted = true;
@@ -148,11 +148,11 @@ export const PlaceAddressAutocomplete: React.FC<PlaceAddressAutocompleteProps> =
         onAddressSelect({
           formattedAddress,
           street,
-          city: city || 'New York',
-          state: state || 'NY',
-          postalCode: postalCode || '10012',
-          country: country || 'US',
-          location: loc,
+          city: city || 'Mumbai',
+          state: state || 'MH',
+          postalCode: postalCode || '400053',
+          country: country || 'IN',
+          location: loc || { lat: 19.1382, lng: 72.8258 },
         });
       } catch (err) {
         console.error('Error fetching place fields:', err);

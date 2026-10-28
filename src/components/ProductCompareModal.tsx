@@ -347,13 +347,13 @@ export const ProductCompareModal: React.FC<ProductCompareModalProps> = ({
                     </span>
                     <h3 className="text-base font-bold text-white mt-0.5 line-clamp-1">{leftProduct.name}</h3>
                     <div className="flex items-baseline gap-2.5 mt-1.5">
-                      <span className="text-xl font-black text-white tabular-nums">${leftProduct.price}</span>
+                      <span className="text-xl font-black text-white tabular-nums">₹{leftProduct.price.toLocaleString('en-IN')}</span>
                       {leftProduct.originalPrice && (
-                        <span className="text-xs text-stone-500 line-through tabular-nums">${leftProduct.originalPrice}</span>
+                        <span className="text-xs text-stone-500 line-through tabular-nums">₹{leftProduct.originalPrice.toLocaleString('en-IN')}</span>
                       )}
                       {leftProduct.originalPrice && (
                         <span className="text-[10px] font-bold text-emerald-400 bg-emerald-500/10 px-1.5 py-0.5 rounded">
-                          Save ${leftProduct.originalPrice - leftProduct.price}
+                          Save ₹{(leftProduct.originalPrice - leftProduct.price).toLocaleString('en-IN')}
                         </span>
                       )}
                     </div>
@@ -393,7 +393,7 @@ export const ProductCompareModal: React.FC<ProductCompareModalProps> = ({
                       ) : (
                         <>
                           <ShoppingBag className="w-4 h-4" />
-                          <span>Add to Bag — ${leftProduct.price}</span>
+                          <span>Add to Bag — ₹{leftProduct.price.toLocaleString('en-IN')}</span>
                         </>
                       )}
                     </button>
@@ -530,13 +530,13 @@ export const ProductCompareModal: React.FC<ProductCompareModalProps> = ({
                     </span>
                     <h3 className="text-base font-bold text-white mt-0.5 line-clamp-1">{rightProduct.name}</h3>
                     <div className="flex items-baseline gap-2.5 mt-1.5">
-                      <span className="text-xl font-black text-white tabular-nums">${rightProduct.price}</span>
+                      <span className="text-xl font-black text-white tabular-nums">₹{rightProduct.price.toLocaleString('en-IN')}</span>
                       {rightProduct.originalPrice && (
-                        <span className="text-xs text-stone-500 line-through tabular-nums">${rightProduct.originalPrice}</span>
+                        <span className="text-xs text-stone-500 line-through tabular-nums">₹{rightProduct.originalPrice.toLocaleString('en-IN')}</span>
                       )}
                       {rightProduct.originalPrice && (
                         <span className="text-[10px] font-bold text-emerald-400 bg-emerald-500/10 px-1.5 py-0.5 rounded">
-                          Save ${rightProduct.originalPrice - rightProduct.price}
+                          Save ₹{(rightProduct.originalPrice - rightProduct.price).toLocaleString('en-IN')}
                         </span>
                       )}
                     </div>
@@ -576,7 +576,7 @@ export const ProductCompareModal: React.FC<ProductCompareModalProps> = ({
                       ) : (
                         <>
                           <ShoppingBag className="w-4 h-4" />
-                          <span>Add to Bag — ${rightProduct.price}</span>
+                          <span>Add to Bag — ₹{rightProduct.price.toLocaleString('en-IN')}</span>
                         </>
                       )}
                     </button>
@@ -700,10 +700,10 @@ export const ProductCompareModal: React.FC<ProductCompareModalProps> = ({
                 <div className="text-stone-200">
                   {leftProduct ? (
                     <div>
-                      <span className="text-sm font-bold text-white tabular-nums">${leftProduct.price}</span>
+                      <span className="text-sm font-bold text-white tabular-nums">₹{leftProduct.price.toLocaleString('en-IN')}</span>
                       {leftProduct.originalPrice && (
                         <span className="text-[11px] text-stone-500 line-through ml-2 tabular-nums">
-                          ${leftProduct.originalPrice}
+                          ₹{leftProduct.originalPrice.toLocaleString('en-IN')}
                         </span>
                       )}
                     </div>
@@ -714,10 +714,10 @@ export const ProductCompareModal: React.FC<ProductCompareModalProps> = ({
                 <div className="text-stone-200">
                   {rightProduct ? (
                     <div>
-                      <span className="text-sm font-bold text-white tabular-nums">${rightProduct.price}</span>
+                      <span className="text-sm font-bold text-white tabular-nums">₹{rightProduct.price.toLocaleString('en-IN')}</span>
                       {rightProduct.originalPrice && (
                         <span className="text-[11px] text-stone-500 line-through ml-2 tabular-nums">
-                          ${rightProduct.originalPrice}
+                          ₹{rightProduct.originalPrice.toLocaleString('en-IN')}
                         </span>
                       )}
                     </div>

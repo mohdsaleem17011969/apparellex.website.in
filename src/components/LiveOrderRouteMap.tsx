@@ -9,12 +9,12 @@ interface LiveOrderRouteMapProps {
   secondsRemaining: number;
 }
 
-// Apparellex Central Dark Store Warehouse Origin (SoHo Dispatch Pod #4)
+// Apparellex Central Dark Store Warehouse Origin (Andheri West Micro-Hub Pod #1)
 export const APPARELLEX_WAREHOUSE_POS = {
-  lat: 40.7259,
-  lng: -73.9983,
-  name: 'Apparellex Central Dark Store Warehouse #4',
-  address: '108 Mercer Street, SoHo, New York, NY 10012',
+  lat: 19.1438,
+  lng: 72.8312,
+  name: 'Apparellex Andheri West Dark Store Pod #1',
+  address: 'Mega Mall, New Link Road, Oshiwara, Andheri West, Mumbai, Maharashtra 400053',
 };
 
 // Fallback destination coordinates if order lacks explicit coordinates
@@ -23,20 +23,18 @@ const getDestinationCoordinates = (order: OrderDetails): { lat: number; lng: num
     return order.coordinates;
   }
 
-  // Derive Manhattan coordinates based on postal code
+  // Derive Andheri West, Mumbai coordinates based on postal code
   const code = (order.postalCode || '').trim();
-  if (code === '10001') return { lat: 40.7505, lng: -73.9934 }; // Chelsea / Penn
-  if (code === '10012') return { lat: 40.7259, lng: -73.9983 }; // SoHo
-  if (code === '10003') return { lat: 40.7315, lng: -73.9882 }; // East Village / Union Sq
-  if (code === '10014') return { lat: 40.7350, lng: -74.0050 }; // West Village
-  if (code === '10016') return { lat: 40.7450, lng: -73.9780 }; // Murray Hill
-  if (code === '10022') return { lat: 40.7580, lng: -73.9680 }; // Midtown East
-  if (code === '10025') return { lat: 40.7980, lng: -73.9680 }; // Upper West Side
+  if (code.includes('400053')) return { lat: 19.1382, lng: 72.8258 }; // Lokhandwala Complex, Andheri West
+  if (code.includes('400058')) return { lat: 19.1205, lng: 72.8465 }; // Andheri West Station / SV Road
+  if (code.includes('400061')) return { lat: 19.1315, lng: 72.8160 }; // Versova, Andheri West
+  if (code.includes('400049')) return { lat: 19.1025, lng: 72.8262 }; // Juhu / Vile Parle West
+  if (code.includes('400102')) return { lat: 19.1390, lng: 72.8420 }; // Oshiwara / Jogeshwari West
 
-  return { lat: 40.7484, lng: -73.9857 }; // Empire State / Midtown Center
+  return { lat: 19.1363, lng: 72.8277 }; // Central Andheri West, Mumbai, Maharashtra
 };
 
-// Algorithmic street grid waypoint generator connecting Warehouse to Customer Destination
+// Algorithmic street grid waypoint generator connecting Warehouse to Customer Destination in Andheri West
 const generateStreetGridWaypoints = (
   start: { lat: number; lng: number },
   end: { lat: number; lng: number },
@@ -47,20 +45,19 @@ const generateStreetGridWaypoints = (
 
   for (let i = 0; i <= steps; i++) {
     const t = i / steps;
-    // Simulate real urban grid turns: Avenue progression then cross street
     const lat = start.lat + (end.lat - start.lat) * t;
     const lng =
       start.lng +
       (end.lng - start.lng) * (t < 0.4 ? t * 0.6 : 0.24 + (t - 0.4) * 1.26);
 
-    let streetLabel = 'City Transit Corridor';
-    if (i === 0) streetLabel = 'Apparellex Warehouse Pod #4 Loading Bay';
-    else if (i === 1) streetLabel = 'Mercer St & Spring St';
-    else if (i === 2) streetLabel = 'Broadway & Prince St';
-    else if (i === 3) streetLabel = 'Union Square Fast Corridor';
-    else if (i === steps - 1) streetLabel = `Final Turn onto ${destAddress.split(',')[0] || 'Destination Way'}`;
+    let streetLabel = 'Andheri West Transit Corridor';
+    if (i === 0) streetLabel = 'Apparellex Pod #1 Loading Bay, Mega Mall, Oshiwara';
+    else if (i === 1) streetLabel = 'New Link Road & Oshiwara Signal';
+    else if (i === 2) streetLabel = 'Infinity Mall Junction, Andheri West';
+    else if (i === 3) streetLabel = 'Lokhandwala Back Road Express Corridor';
+    else if (i === steps - 1) streetLabel = `Final Turn onto ${destAddress.split(',')[0] || 'Lokhandwala Main Road'}`;
     else if (i === steps) streetLabel = `Doorstep: ${destAddress}`;
-    else streetLabel = `Express Courier Lane (Mile ${(t * 1.8).toFixed(1)})`;
+    else streetLabel = `Express Courier Lane (${(t * 1.8).toFixed(1)} km)`;
 
     points.push({ lat, lng, street: streetLabel });
   }
@@ -169,7 +166,7 @@ export const LiveOrderRouteMap: React.FC<LiveOrderRouteMapProps> = ({ order, sec
     if (progress <= 0.08) {
       return {
         currentPos: activeWaypoints[0],
-        currentStreet: 'Staging at SoHo Warehouse Pod #4 Loading Bay',
+        currentStreet: 'Staging at Andheri West Micro-Hub Pod #1 Loading Bay, Oshiwara',
         speedKmh: 0,
       };
     }

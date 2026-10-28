@@ -9,11 +9,11 @@ interface DeliveryCheckerModalProps {
 }
 
 const POPULAR_ZONES = [
-  { code: '10012', label: 'SoHo' },
-  { code: '10001', label: 'Chelsea' },
-  { code: '10003', label: 'East Village' },
-  { code: '10019', label: 'Midtown' },
-  { code: '90210', label: 'Beverly Hills' },
+  { code: '400053', label: 'Andheri West (Lokhandwala)' },
+  { code: '400058', label: 'Andheri West (Station / SV Rd)' },
+  { code: '400061', label: 'Versova Beach' },
+  { code: '400049', label: 'Juhu' },
+  { code: '400102', label: 'Oshiwara' },
 ];
 
 export const DeliveryCheckerModal: React.FC<DeliveryCheckerModalProps> = ({
@@ -23,7 +23,7 @@ export const DeliveryCheckerModal: React.FC<DeliveryCheckerModalProps> = ({
 }) => {
   if (!isOpen) return null;
 
-  const [postalInput, setPostalInput] = useState('10012');
+  const [postalInput, setPostalInput] = useState('400053');
   const [checked, setChecked] = useState(true);
   const [isVerifying, setIsVerifying] = useState(false);
 
@@ -93,7 +93,7 @@ export const DeliveryCheckerModal: React.FC<DeliveryCheckerModalProps> = ({
                   onChange={(e) => {
                     setPostalInput(e.target.value);
                   }}
-                  placeholder="e.g. 10012, 10001, SoHo, 90210..."
+                  placeholder="e.g. 400053, Lokhandwala, Andheri West, 400058..."
                   className="w-full text-xs pl-9 pr-3 py-2.5 border border-black/20 rounded-sm bg-white focus:border-[#FF5757] outline-none"
                 />
               </div>

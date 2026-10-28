@@ -17,48 +17,55 @@ interface MicroHubLocation {
 
 const MICRO_HUBS: MicroHubLocation[] = [
   {
-    id: 'hub-soho',
-    name: 'SoHo Flagship Micro-Hub (Pod 01)',
-    address: '108 Mercer Street, New York, NY 10012',
-    position: { lat: 40.7259, lng: -73.9983 },
+    id: 'hub-andheri-west',
+    name: 'Andheri West Flagship Micro-Hub (Pod 01)',
+    address: 'Mega Mall, New Link Road, Oshiwara, Andheri West, Mumbai 400053',
+    position: { lat: 19.1438, lng: 72.8312 },
     couriersAvailable: 8,
   },
   {
-    id: 'hub-chelsea',
-    name: 'Chelsea & Midtown Hub (Pod 02)',
-    address: '240 W 23rd Street, New York, NY 10011',
-    position: { lat: 40.7445, lng: -73.9972 },
+    id: 'hub-lokhandwala',
+    name: 'Lokhandwala Express Pod (Pod 02)',
+    address: 'Lokhandwala Complex Market, Andheri West, Mumbai 400053',
+    position: { lat: 19.1385, lng: 72.8265 },
     couriersAvailable: 6,
   },
   {
-    id: 'hub-east-village',
-    name: 'East Village Archive Hub (Pod 03)',
-    address: '45 E 4th Street, New York, NY 10003',
-    position: { lat: 40.7269, lng: -73.9897 },
+    id: 'hub-versova',
+    name: 'Versova Coastal Hub (Pod 03)',
+    address: 'Yari Road, Versova, Andheri West, Mumbai 400061',
+    position: { lat: 19.1320, lng: 72.8155 },
     couriersAvailable: 5,
+  },
+  {
+    id: 'hub-juhu',
+    name: 'Juhu Prime Pod (Pod 04)',
+    address: 'Juhu Tara Road, Mumbai 400049',
+    position: { lat: 19.1025, lng: 72.8262 },
+    couriersAvailable: 7,
   },
 ];
 
-// Helper to resolve coordinates from common pincodes/neighborhoods
+// Helper to resolve coordinates from common pincodes/neighborhoods in Andheri West, Mumbai
 const resolvePincodePosition = (pincode: string): { position: { lat: number; lng: number }; label: string } => {
   const clean = pincode.toLowerCase().trim();
-  if (clean.includes('10012') || clean.includes('soho')) {
-    return { position: { lat: 40.7249, lng: -73.9995 }, label: 'SoHo / Lower Manhattan' };
+  if (clean.includes('400053') || clean.includes('lokhandwala') || clean.includes('andheri west') || clean.includes('oshiwara')) {
+    return { position: { lat: 19.1382, lng: 72.8258 }, label: 'Lokhandwala Complex, Andheri West' };
   }
-  if (clean.includes('10001') || clean.includes('chelsea') || clean.includes('midtown')) {
-    return { position: { lat: 40.7505, lng: -73.9934 }, label: 'Chelsea / Midtown West' };
+  if (clean.includes('400058') || clean.includes('station') || clean.includes('sv road') || clean.includes('amrut nagar')) {
+    return { position: { lat: 19.1205, lng: 72.8465 }, label: 'Andheri West Station / SV Road' };
   }
-  if (clean.includes('10003') || clean.includes('east village') || clean.includes('union')) {
-    return { position: { lat: 40.7319, lng: -73.9889 }, label: 'East Village / Union Square' };
+  if (clean.includes('400061') || clean.includes('versova') || clean.includes('yari')) {
+    return { position: { lat: 19.1315, lng: 72.8160 }, label: 'Versova, Andheri West' };
   }
-  if (clean.includes('10019') || clean.includes('central park')) {
-    return { position: { lat: 40.7654, lng: -73.9857 }, label: 'Midtown North / Hell’s Kitchen' };
+  if (clean.includes('400049') || clean.includes('juhu')) {
+    return { position: { lat: 19.1025, lng: 72.8262 }, label: 'Juhu / Vile Parle West' };
   }
-  if (clean.includes('90210') || clean.includes('beverly')) {
-    return { position: { lat: 34.0736, lng: -118.4004 }, label: 'Beverly Hills / Rodeo Drive' };
+  if (clean.includes('400102') || clean.includes('jogeshwari')) {
+    return { position: { lat: 19.1390, lng: 72.8420 }, label: 'Oshiwara / Jogeshwari West' };
   }
-  // Default to central Manhattan fashion district offset
-  return { position: { lat: 40.7350, lng: -73.9940 }, label: `${pincode} Zone` };
+  // Default to central Andheri West, Mumbai, Maharashtra
+  return { position: { lat: 19.1363, lng: 72.8277 }, label: `${pincode} · Andheri West, Mumbai` };
 };
 
 // Calculates Euclidean distance approximation in km

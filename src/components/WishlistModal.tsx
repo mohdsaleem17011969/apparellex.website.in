@@ -84,7 +84,7 @@ export const WishlistModal: React.FC<WishlistModalProps> = ({
                     </h4>
                     <div className="flex items-center gap-2 mt-1">
                       <span className="text-sm font-black text-black tabular-nums">
-                        ${product.price}
+                        ₹{product.price.toLocaleString('en-IN')}
                       </span>
                       <span className="text-[10px] text-emerald-700 font-semibold flex items-center gap-1">
                         <Zap className="w-3 h-3 text-[#FF5757] fill-[#FF5757]" />

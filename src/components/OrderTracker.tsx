@@ -580,7 +580,7 @@ export const OrderTracker: React.FC<OrderTrackerProps> = ({
           <div className="mt-4 pt-4 border-t border-black/10 flex items-center justify-between text-xs">
             <span className="text-black/60 font-medium">Payment:</span>
             <span className="font-bold text-black">
-              {order.paymentMethod === 'cod' ? 'Cash on Delivery (COD)' : 'Card Charged'} — ${order.totalAmount.toFixed(0)}
+              {order.paymentMethod === 'cod' ? 'Cash on Delivery (COD)' : order.paymentMethod === 'upi' ? 'UPI / NetBanking' : 'Card Charged'} — ₹{order.totalAmount.toLocaleString('en-IN')}
             </span>
           </div>
         </div>
@@ -620,7 +620,7 @@ export const OrderTracker: React.FC<OrderTrackerProps> = ({
                 </div>
               </div>
               <span className="font-black text-black tabular-nums">
-                ${(item.product.price * item.quantity).toFixed(0)}
+                ₹{(item.product.price * item.quantity).toLocaleString('en-IN')}
               </span>
             </div>
           ))}

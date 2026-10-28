@@ -17,6 +17,7 @@ export interface Product {
   colors: { name: string; hex: string }[];
   tag?: string;
   isNewDrop?: boolean;
+  releaseDate?: string;
 }
 
 export const PRODUCTS: Product[] = [
@@ -26,8 +27,8 @@ export const PRODUCTS: Product[] = [
     category: 'urban-street',
     categoryLabel: 'Urban Street',
     gender: 'unisex',
-    price: 110,
-    originalPrice: 140,
+    price: 2999,
+    originalPrice: 3999,
     rating: 4.9,
     reviewsCount: 142,
     estDeliveryMins: 9,
@@ -43,6 +44,7 @@ export const PRODUCTS: Product[] = [
     ],
     tag: 'LIMITED RUN',
     isNewDrop: true,
+    releaseDate: '2026-10-25',
   },
   {
     id: 'prod-2',
@@ -50,8 +52,8 @@ export const PRODUCTS: Product[] = [
     category: 'minimalist-zen',
     categoryLabel: 'Minimalist Zen',
     gender: 'men',
-    price: 95,
-    originalPrice: 120,
+    price: 2499,
+    originalPrice: 3299,
     rating: 4.8,
     reviewsCount: 88,
     estDeliveryMins: 8,
@@ -66,6 +68,7 @@ export const PRODUCTS: Product[] = [
     ],
     tag: 'ESSENTIAL',
     isNewDrop: false,
+    releaseDate: '2026-09-18',
   },
   {
     id: 'prod-3',
@@ -73,8 +76,8 @@ export const PRODUCTS: Product[] = [
     category: 'unique-trends',
     categoryLabel: 'Unique Trends',
     gender: 'women',
-    price: 240,
-    originalPrice: 295,
+    price: 5999,
+    originalPrice: 7999,
     rating: 5.0,
     reviewsCount: 64,
     estDeliveryMins: 11,
@@ -89,6 +92,7 @@ export const PRODUCTS: Product[] = [
     ],
     tag: 'RUNWAY EXCLUSIVE',
     isNewDrop: true,
+    releaseDate: '2026-10-24',
   },
   {
     id: 'prod-4',
@@ -96,8 +100,8 @@ export const PRODUCTS: Product[] = [
     category: 'urban-street',
     categoryLabel: 'Urban Street',
     gender: 'men',
-    price: 135,
-    originalPrice: 165,
+    price: 3499,
+    originalPrice: 4499,
     rating: 4.9,
     reviewsCount: 119,
     estDeliveryMins: 10,
@@ -112,6 +116,7 @@ export const PRODUCTS: Product[] = [
     ],
     tag: 'BESTSELLER',
     isNewDrop: false,
+    releaseDate: '2026-10-02',
   },
   {
     id: 'prod-5',
@@ -119,8 +124,8 @@ export const PRODUCTS: Product[] = [
     category: 'minimalist-zen',
     categoryLabel: 'Minimalist Zen',
     gender: 'women',
-    price: 125,
-    originalPrice: 150,
+    price: 2899,
+    originalPrice: 3699,
     rating: 4.8,
     reviewsCount: 76,
     estDeliveryMins: 9,
@@ -135,6 +140,7 @@ export const PRODUCTS: Product[] = [
     ],
     tag: 'NEW ARRIVAL',
     isNewDrop: true,
+    releaseDate: '2026-10-27',
   },
   {
     id: 'prod-6',
@@ -142,8 +148,8 @@ export const PRODUCTS: Product[] = [
     category: 'unique-trends',
     categoryLabel: 'Unique Trends',
     gender: 'unisex',
-    price: 195,
-    originalPrice: 230,
+    price: 4999,
+    originalPrice: 6499,
     rating: 4.9,
     reviewsCount: 93,
     estDeliveryMins: 12,
@@ -158,6 +164,7 @@ export const PRODUCTS: Product[] = [
     ],
     tag: 'DROPPING FAST',
     isNewDrop: true,
+    releaseDate: '2026-10-28',
   },
   {
     id: 'prod-7',
@@ -165,8 +172,8 @@ export const PRODUCTS: Product[] = [
     category: 'minimalist-zen',
     categoryLabel: 'Minimalist Zen',
     gender: 'unisex',
-    price: 160,
-    originalPrice: 200,
+    price: 3999,
+    originalPrice: 5199,
     rating: 5.0,
     reviewsCount: 52,
     estDeliveryMins: 8,
@@ -181,6 +188,7 @@ export const PRODUCTS: Product[] = [
     ],
     tag: 'PREMIUM LUXURY',
     isNewDrop: false,
+    releaseDate: '2026-09-28',
   },
   {
     id: 'prod-8',
@@ -188,8 +196,8 @@ export const PRODUCTS: Product[] = [
     category: 'urban-street',
     categoryLabel: 'Urban Street',
     gender: 'men',
-    price: 145,
-    originalPrice: 180,
+    price: 3799,
+    originalPrice: 4899,
     rating: 4.7,
     reviewsCount: 110,
     estDeliveryMins: 10,
@@ -204,6 +212,7 @@ export const PRODUCTS: Product[] = [
     ],
     tag: 'HAND FINISHED',
     isNewDrop: false,
+    releaseDate: '2026-09-10',
   },
   {
     id: 'prod-9',
@@ -211,8 +220,8 @@ export const PRODUCTS: Product[] = [
     category: 'unique-trends',
     categoryLabel: 'Unique Trends',
     gender: 'women',
-    price: 185,
-    originalPrice: 220,
+    price: 4499,
+    originalPrice: 5799,
     rating: 4.9,
     reviewsCount: 84,
     estDeliveryMins: 9,
@@ -227,6 +236,7 @@ export const PRODUCTS: Product[] = [
     ],
     tag: 'EXCLUSIVE DROP',
     isNewDrop: true,
+    releaseDate: '2026-10-26',
   }
 ];
 

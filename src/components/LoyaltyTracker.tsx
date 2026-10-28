@@ -25,8 +25,10 @@ export interface LoyaltyAccount {
   }>;
 }
 
-export const POINTS_TO_DOLLAR_RATIO = 20; // 20 points = $1 discount (100 points = $5)
-export const POINTS_EARNED_PER_DOLLAR = 2; // 2 points per $1 spent
+export const POINTS_TO_DOLLAR_RATIO = 2; // 2 points = ₹1 discount (e.g. 200 points = ₹100 discount)
+export const POINTS_EARNED_PER_DOLLAR = 0.05; // 5 points per ₹100 spent (e.g. ₹2,999 order earns ~150 points * VIP multiplier)
+export const POINTS_TO_RUPEE_RATIO = POINTS_TO_DOLLAR_RATIO;
+export const POINTS_EARNED_PER_RUPEE = POINTS_EARNED_PER_DOLLAR;
 
 export const DEFAULT_LOYALTY_ACCOUNT: LoyaltyAccount = {
   balance: 380,
@@ -55,7 +57,7 @@ export const DEFAULT_LOYALTY_ACCOUNT: LoyaltyAccount = {
   ],
 };
 
-const STORAGE_KEY = 'apparellex_loyalty_data_v1';
+const STORAGE_KEY = 'apparellex_loyalty_data_v2';
 
 export const getSavedLoyaltyAccount = (): LoyaltyAccount => {
   if (typeof window === 'undefined') return DEFAULT_LOYALTY_ACCOUNT;
@@ -153,7 +155,7 @@ export const LoyaltyTracker: React.FC<LoyaltyTrackerProps> = ({
               </span>
             </div>
             <p className="text-[10px] text-white/60">
-              Worth ${estimatedValueEarned} off future 10-minute drops
+              Worth ₹{estimatedValueEarned} off future 10-minute drops
             </p>
           </div>
         </div>
@@ -190,7 +192,7 @@ export const LoyaltyTracker: React.FC<LoyaltyTrackerProps> = ({
               <strong className="text-black tabular-nums font-black">
                 {account.balance} points
               </strong>{' '}
-              (${(account.balance / POINTS_TO_DOLLAR_RATIO).toFixed(2)} value)
+              (₹{(account.balance / POINTS_TO_DOLLAR_RATIO).toFixed(0)} value)
             </p>
           </div>
         </div>
@@ -203,7 +205,7 @@ export const LoyaltyTracker: React.FC<LoyaltyTrackerProps> = ({
               +{estimatedPointsEarned} Points on Checkout
             </span>
             <span className="text-[10px] text-emerald-600">
-              (${estimatedValueEarned} cash value for future orders)
+              (₹{estimatedValueEarned} cash value for future orders)
             </span>
           </div>
         </div>
@@ -218,7 +220,7 @@ export const LoyaltyTracker: React.FC<LoyaltyTrackerProps> = ({
               <span>Redeem Points for Order Discount</span>
             </label>
             <span className="text-[10px] text-black/50">
-              Max applicable: {maxRedeemablePoints} pts (-${maxDiscountValue})
+              Max applicable: {maxRedeemablePoints} pts (-₹{maxDiscountValue})
             </span>
           </div>
 
@@ -227,7 +229,7 @@ export const LoyaltyTracker: React.FC<LoyaltyTrackerProps> = ({
             {[100, 200, 300, maxRedeemablePoints]
               .filter((pts, idx, arr) => pts <= account.balance && arr.indexOf(pts) === idx)
               .map((pts) => {
-                const discount = (pts / POINTS_TO_DOLLAR_RATIO).toFixed(2);
+                const discount = (pts / POINTS_TO_DOLLAR_RATIO).toFixed(0);
                 const isSelected = isApplied && redeemInput === pts;
                 return (
                   <button
@@ -242,7 +244,7 @@ export const LoyaltyTracker: React.FC<LoyaltyTrackerProps> = ({
                   >
                     <span className="tabular-nums font-black text-xs">{pts} pts</span>
                     <span className="text-[10px] text-[#FF5757] font-semibold">
-                      -${discount} Off
+                      -₹{discount} Off
                     </span>
                   </button>
                 );
@@ -255,7 +257,7 @@ export const LoyaltyTracker: React.FC<LoyaltyTrackerProps> = ({
               <div className="flex items-center gap-2 text-emerald-700">
                 <CheckCircle2 className="w-4 h-4 text-emerald-600" />
                 <span className="font-bold text-xs">
-                  Redeemed {redeemInput} points (-${(redeemInput / POINTS_TO_DOLLAR_RATIO).toFixed(2)})
+                  Redeemed {redeemInput} points (-₹{(redeemInput / POINTS_TO_DOLLAR_RATIO).toFixed(0)})
                 </span>
               </div>
               <button
@@ -269,7 +271,7 @@ export const LoyaltyTracker: React.FC<LoyaltyTrackerProps> = ({
           ) : (
             <p className="text-[10px] text-black/50 italic flex items-center gap-1">
               <Info className="w-3 h-3 text-black/40" />
-              Every 20 points saves $1.00 directly off your instant courier order total.
+              Every 2 points saves ₹1.00 directly off your instant courier order total.
             </p>
           )}
         </div>

@@ -333,7 +333,7 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
 
                               <div className="text-right shrink-0">
                                 <span className="font-black text-black tabular-nums text-sm">
-                                  ${(item.product.price * item.quantity).toFixed(0)}
+                                  ₹{(item.product.price * item.quantity).toLocaleString('en-IN')}
                                 </span>
                               </div>
                             </div>
@@ -346,7 +346,7 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
                             <span className="font-medium">
                               Total Paid:{' '}
                               <strong className="text-black font-black text-sm tabular-nums">
-                                ${orderRecord.totalAmount.toFixed(0)}
+                                ₹{orderRecord.totalAmount.toLocaleString('en-IN')}
                               </strong>
                             </span>
                             <span className="text-black/30">·</span>

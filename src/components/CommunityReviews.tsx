@@ -19,7 +19,7 @@ const INITIAL_REVIEWS: Review[] = [
   {
     id: 'rev-1',
     author: 'Darius K.',
-    city: 'SoHo, NYC',
+    city: 'Lokhandwala, Andheri West',
     rating: 5,
     deliveryMinutes: 8,
     productName: 'Heavyweight Raw-Edge Hoodie',
@@ -30,7 +30,7 @@ const INITIAL_REVIEWS: Review[] = [
   {
     id: 'rev-2',
     author: 'Elena R.',
-    city: 'Arts District, LA',
+    city: 'Oshiwara, Andheri West',
     rating: 5,
     deliveryMinutes: 10,
     productName: 'Sculptural Asymmetric Runway Coat',
@@ -41,7 +41,7 @@ const INITIAL_REVIEWS: Review[] = [
   {
     id: 'rev-3',
     author: 'Marcus T.',
-    city: 'Tribeca',
+    city: 'Versova, Mumbai',
     rating: 5,
     deliveryMinutes: 9,
     productName: 'Modular Technical Cargo Trousers',
@@ -261,7 +261,7 @@ export const CommunityReviews: React.FC<CommunityReviewsProps> = ({ onNotifyToas
                       type="text"
                       value={cityLocation}
                       onChange={(e) => setCityLocation(e.target.value)}
-                      placeholder="e.g. Downtown, Chicago"
+                      placeholder="e.g. Lokhandwala, Andheri West"
                       className="w-full text-xs p-2.5 border border-black/20 rounded-sm bg-white outline-none focus:border-[#FF5757]"
                     />
                   </div>

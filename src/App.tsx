@@ -28,7 +28,7 @@ import { GoogleMapsWrapper } from './components/GoogleMapsWrapper';
 import { ActiveDeliveryTrackerWidget } from './components/ActiveDeliveryTrackerWidget';
 import { AiSuggestionsModal } from './components/AiSuggestionsModal';
 
-const STORAGE_KEY = 'apparellex-products-v1';
+const STORAGE_KEY = 'apparellex-products-v3';
 const SETTINGS_STORAGE_KEY = 'apparellex-site-settings-v1';
 const AUTH_STORAGE_KEY = 'apparellex_auth_user';
 const ADMIN_QUERY_KEY = 'admin';
@@ -90,13 +90,13 @@ const INITIAL_PAST_ORDERS: PastOrderRecord[] = [
   {
     orderId: 'APX-954128',
     name: 'Shaikh Kamran',
-    phone: '+1 (555) 019-2834',
-    address: '450 West 33rd Street, Hudson Yards',
-    city: 'New York',
-    postalCode: '10001',
-    coordinates: { lat: 40.7535, lng: -73.9995 },
+    phone: '+91 98201 92834',
+    address: 'Flat 502, Oberoi Sky Heights, Lokhandwala Complex, Andheri West',
+    city: 'Mumbai',
+    postalCode: '400053',
+    coordinates: { lat: 19.1382, lng: 72.8258 },
     paymentMethod: 'card',
-    totalAmount: 180,
+    totalAmount: 5999,
     formattedDate: 'Active Now · Live Dispatch',
     statusText: 'In Transit (8 Mins ETA)',
     statusType: 'in_transit',
@@ -114,13 +114,13 @@ const INITIAL_PAST_ORDERS: PastOrderRecord[] = [
   {
     orderId: 'APX-928104',
     name: 'Shaikh Kamran',
-    phone: '+1 (555) 019-2834',
-    address: '742 Evergreen Terrace, Apt 4B',
-    city: 'New York',
-    postalCode: '10001',
-    coordinates: { lat: 40.7505, lng: -73.9934 },
+    phone: '+91 98201 92834',
+    address: 'Bungalow 14, Greenfield Society, Yamuna Nagar, Oshiwara, Andheri West',
+    city: 'Mumbai',
+    postalCode: '400053',
+    coordinates: { lat: 19.1415, lng: 72.8302 },
     paymentMethod: 'card',
-    totalAmount: 245,
+    totalAmount: 6498,
     formattedDate: 'Sep 28, 2026 · 04:15 PM',
     statusText: 'Delivered (8 Mins)',
     statusType: 'delivered',
@@ -144,11 +144,13 @@ const INITIAL_PAST_ORDERS: PastOrderRecord[] = [
   {
     orderId: 'APX-814920',
     name: 'Shaikh Kamran',
-    phone: '+1 (555) 019-2834',
-    address: '108 Mercer Street, Floor 3, SoHo',
-    postalCode: '10012',
+    phone: '+91 98201 92834',
+    address: 'Mega Mall Pod #1 Corridor, New Link Road, Andheri West',
+    city: 'Mumbai',
+    postalCode: '400053',
+    coordinates: { lat: 19.1438, lng: 72.8312 },
     paymentMethod: 'cod',
-    totalAmount: 95,
+    totalAmount: 2499,
     formattedDate: 'Sep 14, 2026 · 02:30 PM',
     statusText: 'Doorstep Try-On Kept',
     statusType: 'try_on_kept',
@@ -166,11 +168,13 @@ const INITIAL_PAST_ORDERS: PastOrderRecord[] = [
   {
     orderId: 'APX-762019',
     name: 'Shaikh Kamran',
-    phone: '+1 (555) 019-2834',
-    address: '742 Evergreen Terrace, Apt 4B',
-    postalCode: '10001',
+    phone: '+91 98201 92834',
+    address: 'Plot 28, Silver Beach Estate, Yari Road, Versova, Andheri West',
+    city: 'Mumbai',
+    postalCode: '400061',
+    coordinates: { lat: 19.1315, lng: 72.8160 },
     paymentMethod: 'card',
-    totalAmount: 240,
+    totalAmount: 5999,
     formattedDate: 'Aug 30, 2026 · 06:45 PM',
     statusText: 'Delivered (10 Mins)',
     statusType: 'delivered',
@@ -521,9 +525,9 @@ function AppContent() {
 
   const currencyFormatter = useMemo(
     () =>
-      new Intl.NumberFormat('en-US', {
+      new Intl.NumberFormat('en-IN', {
         style: 'currency',
-        currency: 'USD',
+        currency: 'INR',
         maximumFractionDigits: 0,
       }),
     []

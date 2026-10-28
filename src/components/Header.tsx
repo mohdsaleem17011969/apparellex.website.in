@@ -102,14 +102,16 @@ export const Header: React.FC<HeaderProps> = ({
 
       {/* TOP NAVIGATION BAR */}
       <header className="sticky top-0 w-full z-40 bg-[#FEFCF5]/90 backdrop-blur-md border-b border-black/10 transition-all duration-200">
-        <nav className="container mx-auto px-6 py-4 flex justify-between items-center" aria-label="Main Navigation">
-          {/* Zone 1: Single text element wordmark */}
-          <a
-            href="#home"
-            className="text-2xl md:text-3xl font-extrabold tracking-tighter font-fashion text-[#1a1a1a] hover:opacity-90 transition select-none"
-          >
-            {brandTitle}
-          </a>
+        <nav className="w-full px-4 sm:px-6 md:px-8 py-3.5 flex justify-between items-center" aria-label="Main Navigation">
+          {/* Zone 1: Single text element wordmark placed at extreme left side */}
+          <div className="flex-shrink-0">
+            <a
+              href="#home"
+              className="text-2xl md:text-3xl font-extrabold tracking-tighter font-fashion text-[#1a1a1a] hover:opacity-90 transition select-none"
+            >
+              {brandTitle}
+            </a>
+          </div>
 
           {/* Zone 2: Clean text navigation links */}
           <div className="hidden lg:flex items-center space-x-8 text-xs font-bold uppercase tracking-widest text-[#1a1a1a]/80">
@@ -132,15 +134,6 @@ export const Header: React.FC<HeaderProps> = ({
             <a href="#vault" className="hover:text-[#FF5757] transition-colors">
               VIP Vault
             </a>
-            {onOpenAiSuggestions && (
-              <button
-                onClick={onOpenAiSuggestions}
-                className="hover:text-[#FF5757] transition-colors uppercase tracking-widest cursor-pointer inline-flex items-center gap-1 text-[#FF5757]"
-              >
-                <Sparkles className="w-3.5 h-3.5 fill-[#FF5757]" />
-                <span>AI Stylist</span>
-              </button>
-            )}
             <button
               onClick={onOpenDeliveryChecker}
               className="hover:text-[#FF5757] transition-colors uppercase tracking-widest cursor-pointer inline-flex items-center gap-1"
@@ -160,19 +153,7 @@ export const Header: React.FC<HeaderProps> = ({
           </div>
 
           {/* Zone 3: Functional interactive affordances */}
-          <div className="flex items-center space-x-2 sm:space-x-3 md:space-x-4">
-            {/* AI Suggestions Quick Action Button */}
-            {onOpenAiSuggestions && (
-              <button
-                onClick={onOpenAiSuggestions}
-                className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 bg-[#111111] hover:bg-[#FF5757] text-white text-[11px] font-bold uppercase tracking-wider rounded-sm shadow-sm transition cursor-pointer"
-                title="Open AI Suggestions & Style Concierge"
-              >
-                <Sparkles className="w-3.5 h-3.5 text-[#FF5757] fill-[#FF5757]" />
-                <span>AI Suggestions</span>
-              </button>
-            )}
-
+          <div className="flex items-center space-x-1.5 sm:space-x-2 md:space-x-3">
             {/* Search Trigger */}
             <button
               onClick={handleToggleSearch}
@@ -187,45 +168,13 @@ export const Header: React.FC<HeaderProps> = ({
             {onOpenShare && (
               <button
                 onClick={onOpenShare}
-                className="p-2 text-[#1a1a1a] hover:text-[#FF5757] transition-colors rounded-full hover:bg-black/5 cursor-pointer"
+                className="p-2 text-[#1a1a1a] hover:text-[#FF5757] transition-colors rounded-full hover:bg-black/5 cursor-pointer hidden md:flex items-center justify-center"
                 aria-label="Share on WhatsApp with friends"
                 title="Share on WhatsApp"
               >
                 <Share2 className="w-5 h-5" />
               </button>
             )}
-
-            {/* High-Converting Auth / Sign In Trigger */}
-            {onOpenAuth && !currentUser && (
-              <button
-                onClick={() => onOpenAuth('login')}
-                className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-black/15 hover:border-[#FF5757] hover:text-[#FF5757] text-xs font-bold uppercase tracking-wider transition cursor-pointer"
-              >
-                <User className="w-3.5 h-3.5" />
-                <span>Sign In</span>
-              </button>
-            )}
-
-            {/* Profile & Order History Button */}
-            <button
-              onClick={currentUser ? onOpenProfile : (onOpenAuth ? () => onOpenAuth('login') : onOpenProfile)}
-              className="p-1.5 text-[#1a1a1a] hover:text-[#FF5757] transition-colors rounded-full hover:bg-black/5 cursor-pointer flex items-center justify-center"
-              aria-label={currentUser ? `Profile of ${currentUser.name}` : 'Sign in or view profile'}
-              title={currentUser ? `${currentUser.name} (VIP Member)` : 'Sign In / Profile'}
-            >
-              {currentUser?.avatar ? (
-                <div className="relative">
-                  <img
-                    src={currentUser.avatar}
-                    alt={currentUser.name}
-                    className="w-6 h-6 rounded-full object-cover border-2 border-[#FF5757]"
-                  />
-                  <span className="w-2 h-2 rounded-full bg-emerald-500 absolute bottom-0 right-0 ring-1 ring-white" />
-                </div>
-              ) : (
-                <User className="w-5 h-5" />
-              )}
-            </button>
 
             {/* Wishlist Button */}
             <button
@@ -241,6 +190,54 @@ export const Header: React.FC<HeaderProps> = ({
                 </span>
               )}
             </button>
+
+            {/* High-Converting Auth / Sign In Trigger (Single clear button, no extra symbol) */}
+            {onOpenAuth && !currentUser && (
+              <button
+                onClick={() => onOpenAuth('login')}
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-black/20 hover:border-[#FF5757] hover:text-[#FF5757] hover:bg-black/5 text-xs font-bold uppercase tracking-wider transition cursor-pointer"
+                title="Sign in to your account"
+              >
+                <User className="w-3.5 h-3.5" />
+                <span>Sign In</span>
+              </button>
+            )}
+
+            {/* Profile & Order History Button (ONLY shown when logged in) */}
+            {currentUser && (
+              <button
+                onClick={onOpenProfile}
+                className="p-1.5 text-[#1a1a1a] hover:text-[#FF5757] transition-colors rounded-full hover:bg-black/5 cursor-pointer flex items-center justify-center"
+                aria-label={`Profile of ${currentUser.name}`}
+                title={`${currentUser.name} (VIP Member)`}
+              >
+                {currentUser?.avatar ? (
+                  <div className="relative">
+                    <img
+                      src={currentUser.avatar}
+                      alt={currentUser.name}
+                      className="w-6 h-6 rounded-full object-cover border-2 border-[#FF5757]"
+                    />
+                    <span className="w-2 h-2 rounded-full bg-emerald-500 absolute bottom-0 right-0 ring-1 ring-white" />
+                  </div>
+                ) : (
+                  <User className="w-5 h-5" />
+                )}
+              </button>
+            )}
+
+            {/* AI Suggestions Action Button - Sleek black pill placed harmoniously beside Bag */}
+            {onOpenAiSuggestions && (
+              <button
+                onClick={onOpenAiSuggestions}
+                className="bg-[#111111] text-white px-3.5 py-2.5 rounded-full hover:bg-[#FF5757] transition-all duration-200 flex items-center gap-1.5 sm:gap-2 group cursor-pointer shadow-sm hover:shadow"
+                title="Open AI Suggestions & Style Concierge"
+              >
+                <Sparkles className="w-4 h-4 text-[#FF5757] fill-[#FF5757] group-hover:text-white group-hover:fill-white transition-colors" />
+                <span className="text-xs font-bold uppercase tracking-wider hidden sm:inline">AI Suggestions</span>
+                <span className="text-xs font-bold uppercase tracking-wider sm:hidden">AI</span>
+              </button>
+            )}
 
             {/* Cart Drawer Trigger */}
             <button
@@ -261,9 +258,9 @@ export const Header: React.FC<HeaderProps> = ({
         {showSearch && (
           <div
             ref={searchContainerRef}
-            className="border-t border-black/10 bg-white px-6 py-3 shadow-inner relative"
+            className="border-t border-black/10 bg-white px-4 sm:px-6 md:px-8 py-3 shadow-inner relative"
           >
-            <div className="container mx-auto flex items-center gap-3">
+            <div className="w-full flex items-center gap-3">
               <Search className="w-4 h-4 text-black/40" />
               <input
                 type="text"

@@ -110,11 +110,11 @@ export const ProductQuickViewModal: React.FC<ProductQuickViewModalProps> = ({
             <div className="flex items-center gap-4 mb-4">
               <div className="flex items-baseline gap-2">
                 <span className="text-2xl font-black text-[#1a1a1a] tabular-nums">
-                  ${product.price}
+                  ₹{product.price.toLocaleString('en-IN')}
                 </span>
                 {product.originalPrice && (
                   <span className="text-sm text-black/40 line-through tabular-nums">
-                    ${product.originalPrice}
+                    ₹{product.originalPrice.toLocaleString('en-IN')}
                   </span>
                 )}
               </div>

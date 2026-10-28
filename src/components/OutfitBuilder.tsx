@@ -204,17 +204,17 @@ export const OutfitBuilder: React.FC<OutfitBuilderProps> = ({ onAddOutfitToBag, 
             <div className="bg-black/40 border border-white/10 p-4 rounded-sm space-y-2 text-xs">
               <div className="flex justify-between text-white/60">
                 <span>Individual Pieces Total</span>
-                <span className="line-through tabular-nums">${rawSubtotal}</span>
+                <span className="line-through tabular-nums">₹{rawSubtotal.toLocaleString('en-IN')}</span>
               </div>
               <div className="flex justify-between text-emerald-400 font-semibold">
                 <span>Curator Bundle Savings (15%)</span>
-                <span className="tabular-nums">-${bundleDiscount}</span>
+                <span className="tabular-nums">-₹{bundleDiscount.toLocaleString('en-IN')}</span>
               </div>
               <div className="flex justify-between items-baseline pt-2 border-t border-white/10 text-white">
                 <span className="font-bold text-sm uppercase tracking-wider">Bundle Total</span>
                 <div className="text-right">
                   <span className="text-2xl font-black font-fashion tabular-nums text-white">
-                    ${bundlePrice}
+                    ₹{bundlePrice.toLocaleString('en-IN')}
                   </span>
                   <span className="block text-[10px] text-emerald-400 font-semibold uppercase">
                     Free 10-Minute Dispatch
@@ -229,7 +229,7 @@ export const OutfitBuilder: React.FC<OutfitBuilderProps> = ({ onAddOutfitToBag, 
               className="w-full bg-[#FF5757] hover:bg-white hover:text-black text-white py-4 px-6 rounded-sm text-xs font-black uppercase tracking-wider flex items-center justify-center gap-2 transition-all cursor-pointer shadow-lg active:scale-95"
             >
               <ShoppingBag className="w-4 h-4" />
-              <span>Add Complete Look to Bag (${bundlePrice})</span>
+              <span>Add Complete Look to Bag (₹{bundlePrice.toLocaleString('en-IN')})</span>
             </button>
 
             <div className="flex items-center justify-center gap-2 text-[11px] text-white/50 text-center">

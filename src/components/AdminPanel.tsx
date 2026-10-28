@@ -1145,7 +1145,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                     <DollarSign className="w-4 h-4 text-emerald-400" />
                   </div>
                   <div className="text-2xl font-black tabular-nums text-white">
-                    ${(orders.reduce((acc, curr) => acc + curr.totalAmount, 0) + 14200).toLocaleString()}
+                    ₹{(orders.reduce((acc, curr) => acc + curr.totalAmount, 0) + 482000).toLocaleString('en-IN')}
                   </div>
                   <div className="text-[11px] text-emerald-400 flex items-center gap-1">
                     <span>↑ +18.4%</span>
@@ -1452,11 +1452,11 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                         </h4>
                         <div className="flex items-center gap-2 mt-1">
                           <span className="text-sm font-black tabular-nums text-white">
-                            ${prod.price}
+                            ₹{prod.price.toLocaleString('en-IN')}
                           </span>
                           {prod.originalPrice && (
                             <span className="text-xs tabular-nums text-stone-400 line-through">
-                              ${prod.originalPrice}
+                              ₹{prod.originalPrice.toLocaleString('en-IN')}
                             </span>
                           )}
                         </div>
@@ -1553,7 +1553,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                             </div>
                           </td>
                           <td className="py-3 px-4">
-                            <div className="font-bold tabular-nums text-white">${ord.totalAmount}</div>
+                            <div className="font-bold tabular-nums text-white">₹{ord.totalAmount.toLocaleString('en-IN')}</div>
                             <div className="text-[10px] text-stone-400 uppercase">
                               {ord.paymentMethod === 'cod' ? 'Cash on Try-on' : 'Card Paid'}
                             </div>
@@ -2293,8 +2293,8 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
 
                   <div className="pt-3 border-t border-white/5 flex items-center justify-between text-[11px] text-stone-400">
                     <span>Guaranteed SLA: <b className="text-white font-mono">{siteForm.guaranteedDeliveryMinutes || 10} Mins</b></span>
-                    <span>Free Shipping: <b className="text-white font-mono">${siteForm.freeShippingThreshold || 150}</b></span>
-                    <span>Sales Tax: <b className="text-white font-mono">{siteForm.taxRatePercentage || 8.5}%</b></span>
+                    <span>Free Shipping: <b className="text-white font-mono">₹{siteForm.freeShippingThreshold || 1499}</b></span>
+                    <span>Sales Tax: <b className="text-white font-mono">{siteForm.taxRatePercentage || 5.0}%</b></span>
                   </div>
                 </div>
 
@@ -3259,11 +3259,11 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                   />
                 </div>
                 <div>
-                  <label className="block text-stone-400 text-[11px] mb-1">Free Delivery Basket Minimum ($)</label>
+                  <label className="block text-stone-400 text-[11px] mb-1">Free Delivery Basket Minimum (₹)</label>
                   <input
                     type="number"
                     min="0"
-                    value={companyEditForm.freeShippingThreshold ?? 150}
+                    value={companyEditForm.freeShippingThreshold ?? 1499}
                     onChange={(e) => setCompanyEditForm({ ...companyEditForm, freeShippingThreshold: Number(e.target.value) })}
                     className="w-full bg-black/40 border border-white/10 rounded-lg px-3 py-1.5 text-white font-mono"
                   />
@@ -3494,7 +3494,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                 </div>
 
                 <div>
-                  <label className="block text-stone-400 text-[11px] mb-1">Price ($)</label>
+                  <label className="block text-stone-400 text-[11px] mb-1">Price (₹)</label>
                   <input
                     type="number"
                     min="1"
@@ -3504,17 +3504,17 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                   />
                 </div>
                 <div>
-                  <label className="block text-stone-400 text-[11px] mb-1">Original Price ($ for discount)</label>
+                  <label className="block text-stone-400 text-[11px] mb-1">Original Price (₹ for discount)</label>
                   <input
                     type="number"
                     min="1"
                     value={productForm.originalPrice || ''}
                     onChange={(e) =>
-                      setProductForm({ ...productForm, originalPrice: e.target.value ? Number(e.target.value) : undefined })
-                    }
-                    className="w-full bg-black/40 border border-white/10 rounded-lg px-3 py-1.5 text-white font-mono"
-                  />
-                </div>
+                    setProductForm({ ...productForm, originalPrice: e.target.value ? Number(e.target.value) : undefined })
+                  }
+                  className="w-full bg-black/40 border border-white/10 rounded-lg px-3 py-1.5 text-white font-mono"
+                />
+              </div>
 
                 <div>
                   <label className="block text-stone-400 text-[11px] mb-1">Gender</label>
@@ -3685,14 +3685,14 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                         </p>
                       </div>
                     </div>
-                    <span className="font-bold text-white tabular-nums">${item.product.price * item.quantity}</span>
+                    <span className="font-bold text-white tabular-nums">₹{(item.product.price * item.quantity).toLocaleString('en-IN')}</span>
                   </div>
                 ))}
               </div>
 
               <div className="pt-2 border-t border-white/5 flex items-center justify-between text-sm">
                 <span className="font-semibold text-stone-300">Total Order Value:</span>
-                <span className="font-black text-emerald-400 tabular-nums">${selectedOrderDetails.totalAmount}</span>
+                <span className="font-black text-emerald-400 tabular-nums">₹{selectedOrderDetails.totalAmount.toLocaleString('en-IN')}</span>
               </div>
             </div>
 

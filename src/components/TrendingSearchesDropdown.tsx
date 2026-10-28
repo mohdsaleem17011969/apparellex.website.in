@@ -231,11 +231,11 @@ export const TrendingSearchesDropdown: React.FC<TrendingSearchesDropdownProps> =
                       </h4>
                       <div className="flex items-center gap-1.5 mt-0.5">
                         <span className="text-xs font-black text-black tabular-nums">
-                          ${prod.price}
+                          ₹{prod.price.toLocaleString('en-IN')}
                         </span>
                         {prod.originalPrice && (
                           <span className="text-[10px] text-black/40 line-through tabular-nums">
-                            ${prod.originalPrice}
+                            ₹{prod.originalPrice.toLocaleString('en-IN')}
                           </span>
                         )}
                         <span className="text-[9px] text-emerald-600 font-semibold ml-auto">

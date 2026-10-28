@@ -23,8 +23,8 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
   if (!isOpen) return null;
 
   const subtotal = items.reduce((sum, item) => sum + item.product.price * item.quantity, 0);
-  const freeShippingThreshold = 100;
-  const deliveryFee = subtotal >= freeShippingThreshold || items.length === 0 ? 0 : 7;
+  const freeShippingThreshold = 1499;
+  const deliveryFee = subtotal >= freeShippingThreshold || items.length === 0 ? 0 : 99;
   const total = subtotal + deliveryFee;
   const progressToFreeShipping = Math.min(100, (subtotal / freeShippingThreshold) * 100);
 
@@ -72,7 +72,7 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
               <span className="tabular-nums text-white/80">
                 {subtotal >= freeShippingThreshold
                   ? 'FREE Priority Express'
-                  : `$${(freeShippingThreshold - subtotal).toFixed(0)} away from FREE delivery`}
+                  : `₹${(freeShippingThreshold - subtotal).toLocaleString('en-IN')} away from FREE delivery`}
               </span>
             </div>
             <div className="w-full bg-white/20 h-1.5 rounded-full overflow-hidden">
@@ -165,7 +165,7 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
                       </div>
 
                       <span className="text-sm font-black text-[#1a1a1a] tabular-nums">
-                        ${(item.product.price * item.quantity).toFixed(0)}
+                        ₹{(item.product.price * item.quantity).toLocaleString('en-IN')}
                       </span>
                     </div>
                   </div>
@@ -180,7 +180,7 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
               <div className="space-y-1.5 text-xs text-black/70">
                 <div className="flex justify-between">
                   <span>Subtotal</span>
-                  <span className="font-semibold text-black tabular-nums">${subtotal.toFixed(0)}</span>
+                  <span className="font-semibold text-black tabular-nums">₹{subtotal.toLocaleString('en-IN')}</span>
                 </div>
                 <div className="flex justify-between items-center">
                   <span className="flex items-center gap-1">
@@ -191,13 +191,13 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
                     {deliveryFee === 0 ? (
                       <span className="text-emerald-700 font-bold uppercase text-[11px]">FREE</span>
                     ) : (
-                      `$${deliveryFee}`
+                      `₹${deliveryFee}`
                     )}
                   </span>
                 </div>
                 <div className="flex justify-between text-base font-black text-[#1a1a1a] pt-2 border-t border-black/10">
                   <span>Estimated Total</span>
-                  <span className="tabular-nums">${total.toFixed(0)}</span>
+                  <span className="tabular-nums">₹{total.toLocaleString('en-IN')}</span>
                 </div>
               </div>
 

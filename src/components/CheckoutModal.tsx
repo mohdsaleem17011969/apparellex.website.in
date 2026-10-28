@@ -34,10 +34,10 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
   const [name, setName] = useState('');
   const [phone, setPhone] = useState('');
   const [address, setAddress] = useState(existingOrder?.address || '');
-  const [city, setCity] = useState(existingOrder?.city || 'New York');
-  const [postalCode, setPostalCode] = useState(existingOrder?.postalCode || '10001');
+  const [city, setCity] = useState(existingOrder?.city || 'Mumbai');
+  const [postalCode, setPostalCode] = useState(existingOrder?.postalCode || '400053');
   const [coordinates, setCoordinates] = useState<{ lat: number; lng: number } | undefined>(
-    existingOrder?.coordinates || undefined
+    existingOrder?.coordinates || { lat: 19.1382, lng: 72.8258 }
   );
   const [isAddressAutocompleted, setIsAddressAutocompleted] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState<'cod' | 'card' | 'upi'>('cod');
@@ -50,7 +50,7 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
   const [pointsDiscount, setPointsDiscount] = useState(0);
 
   const subtotal = items.reduce((sum, item) => sum + item.product.price * item.quantity, 0);
-  const deliveryFee = subtotal >= 100 || items.length === 0 ? 0 : 7;
+  const deliveryFee = subtotal >= 1499 || items.length === 0 ? 0 : 99;
   const finalTotal = Math.max(0, subtotal + deliveryFee - pointsDiscount);
 
   const handleRedeemPoints = (points: number, discount: number) => {
@@ -65,8 +65,8 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
     if (parsed.location) {
       setCoordinates(parsed.location);
     } else {
-      // Default nearby Manhattan coords if location object missing
-      setCoordinates({ lat: 40.7505, lng: -73.9934 });
+      // Default nearby Andheri West coords if location object missing
+      setCoordinates({ lat: 19.1382, lng: 72.8258 });
     }
     setIsAddressAutocompleted(true);
     setFormError(null);
@@ -87,9 +87,9 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
       name: name.trim(),
       phone: phone.trim(),
       address: address.trim(),
-      city: city.trim() || 'New York',
-      postalCode: postalCode.trim() || '10001',
-      coordinates: coordinates || { lat: 40.7505, lng: -73.9934 },
+      city: city.trim() || 'Mumbai',
+      postalCode: postalCode.trim() || '400053',
+      coordinates: coordinates || { lat: 19.1382, lng: 72.8258 },
       paymentMethod,
       totalAmount: finalTotal,
       items: [...items],
@@ -111,7 +111,7 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
         newBalance = Math.max(0, newBalance - redeemedPoints);
         historyEntries.unshift({
           id: `tx-red-${Date.now()}`,
-          description: `Redeemed on Order #${orderId} (-$${pointsDiscount.toFixed(2)})`,
+          description: `Redeemed on Order #${orderId} (-₹${pointsDiscount.toFixed(0)})`,
           points: -redeemedPoints,
           date: nowStr,
         });
@@ -214,7 +214,7 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
                 </div>
                 <div className="flex items-center justify-between text-black/70">
                   <span>Subtotal</span>
-                  <span className="tabular-nums font-medium">${subtotal.toFixed(0)}</span>
+                  <span className="tabular-nums font-medium">₹{subtotal.toLocaleString('en-IN')}</span>
                 </div>
                 <div className="flex items-center justify-between text-black/70">
                   <span>10-Minute Dark Store Dispatch</span>
@@ -222,7 +222,7 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
                     {deliveryFee === 0 ? (
                       <span className="text-emerald-700 font-bold uppercase text-[10px]">FREE</span>
                     ) : (
-                      `$${deliveryFee}`
+                      `₹${deliveryFee}`
                     )}
                   </span>
                 </div>
@@ -232,12 +232,12 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
                       <Award className="w-3.5 h-3.5" />
                       <span>Loyalty Reward ({redeemedPoints} pts redeemed)</span>
                     </span>
-                    <span className="tabular-nums">-${pointsDiscount.toFixed(2)}</span>
+                    <span className="tabular-nums">-₹{pointsDiscount.toFixed(0)}</span>
                   </div>
                 )}
                 <div className="flex items-center justify-between pt-2 border-t border-black/10 text-sm font-black text-[#1a1a1a]">
                   <span>Total Payable</span>
-                  <span className="tabular-nums text-base text-[#111111]">${finalTotal.toFixed(0)}</span>
+                  <span className="tabular-nums text-base text-[#111111]">₹{finalTotal.toLocaleString('en-IN')}</span>
                 </div>
               </div>
 
@@ -271,7 +271,7 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
                       required
                       value={phone}
                       onChange={(e) => setPhone(e.target.value)}
-                      placeholder="+1 (555) 019-2834"
+                      placeholder="+91 98201 92834"
                       className="w-full text-xs p-3 border border-black/20 rounded-sm bg-white focus:border-[#FF5757] outline-none"
                     />
                   </div>
@@ -327,7 +327,7 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
                       type="text"
                       value={city}
                       onChange={(e) => setCity(e.target.value)}
-                      placeholder="e.g. New York"
+                      placeholder="e.g. Mumbai"
                       className="w-full text-xs p-3 border border-black/20 rounded-sm bg-white focus:border-[#FF5757] outline-none"
                     />
                   </div>
@@ -339,7 +339,7 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
                       type="text"
                       value={postalCode}
                       onChange={(e) => setPostalCode(e.target.value)}
-                      placeholder="e.g. 10001"
+                      placeholder="e.g. 400053"
                       className="w-full text-xs p-3 border border-black/20 rounded-sm bg-white focus:border-[#FF5757] outline-none"
                     />
                   </div>
