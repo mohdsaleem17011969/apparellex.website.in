@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { ShoppingBag, Search, Heart, X, Zap, User, Share2, Sparkles } from 'lucide-react';
+import { ShoppingBag, Search, Heart, X, Zap, User, Share2, Sparkles, Menu } from 'lucide-react';
 import { Product, PRODUCTS } from '../data/products';
 import { TrendingSearchesDropdown } from './TrendingSearchesDropdown';
 import { SiteSettings } from '../data/siteSettings';
@@ -44,6 +44,7 @@ export const Header: React.FC<HeaderProps> = ({
   const [showSearch, setShowSearch] = useState(false);
   const [showBanner, setShowBanner] = useState(true);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const searchContainerRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
@@ -102,9 +103,9 @@ export const Header: React.FC<HeaderProps> = ({
 
       {/* TOP NAVIGATION BAR */}
       <header className="sticky top-0 w-full z-40 bg-[#FEFCF5]/90 backdrop-blur-md border-b border-black/10 transition-all duration-200">
-        <nav className="w-full px-4 sm:px-6 md:px-8 py-3.5 flex justify-between items-center" aria-label="Main Navigation">
+        <nav className="w-full px-4 sm:px-6 md:px-8 py-3 flex items-center justify-between gap-3 lg:gap-6" aria-label="Main Navigation">
           {/* Zone 1: Single text element wordmark placed at extreme left side */}
-          <div className="flex-shrink-0">
+          <div className="flex-shrink-0 flex items-center">
             <a
               href="#home"
               className="text-2xl md:text-3xl font-extrabold tracking-tighter font-fashion text-[#1a1a1a] hover:opacity-90 transition select-none"
@@ -113,51 +114,68 @@ export const Header: React.FC<HeaderProps> = ({
             </a>
           </div>
 
-          {/* Zone 2: Clean text navigation links */}
-          <div className="hidden lg:flex items-center space-x-8 text-xs font-bold uppercase tracking-widest text-[#1a1a1a]/80">
-            <a href="#home" className="hover:text-[#FF5757] transition-colors">
-              Home
-            </a>
-            <a href="#categories" className="hover:text-[#FF5757] transition-colors">
-              Categories
-            </a>
-            <a
-              href="#catalog"
-              onClick={() => onSelectCategory('all')}
-              className="hover:text-[#FF5757] transition-colors"
-            >
-              Drops & Shop
-            </a>
-            <a href="#outfit-studio" className="hover:text-[#FF5757] transition-colors">
-              Outfit Studio
-            </a>
-            <a href="#vault" className="hover:text-[#FF5757] transition-colors">
-              VIP Vault
-            </a>
-            <button
-              onClick={onOpenDeliveryChecker}
-              className="hover:text-[#FF5757] transition-colors uppercase tracking-widest cursor-pointer inline-flex items-center gap-1"
-            >
-              <span>10-Min Delivery</span>
-              <span className="w-1.5 h-1.5 rounded-full bg-[#FF5757] animate-pulse"></span>
-            </button>
-            <button
-              onClick={onOpenProfile}
-              className="hover:text-[#FF5757] transition-colors uppercase tracking-widest cursor-pointer"
-            >
-              Orders
-            </button>
-            <a href="#about" className="hover:text-[#FF5757] transition-colors">
-              About Us
-            </a>
+          {/* Zone 2: Clean, equally positioned and spaced text navigation options */}
+          <div className="hidden lg:flex flex-1 items-center justify-center px-1 xl:px-4 min-w-0">
+            <div className="flex items-center justify-center gap-1 xl:gap-2 bg-black/[0.03] p-1 rounded-full border border-black/[0.06]">
+              <a
+                href="#home"
+                className="px-3 xl:px-3.5 py-1.5 text-[11px] xl:text-xs font-bold uppercase tracking-wider text-[#1a1a1a]/80 hover:text-[#FF5757] hover:bg-white rounded-full transition-all duration-150 whitespace-nowrap shadow-xs hover:shadow-xs"
+              >
+                Home
+              </a>
+              <a
+                href="#categories"
+                className="px-3 xl:px-3.5 py-1.5 text-[11px] xl:text-xs font-bold uppercase tracking-wider text-[#1a1a1a]/80 hover:text-[#FF5757] hover:bg-white rounded-full transition-all duration-150 whitespace-nowrap shadow-xs hover:shadow-xs"
+              >
+                Categories
+              </a>
+              <a
+                href="#catalog"
+                onClick={() => onSelectCategory('all')}
+                className="px-3 xl:px-3.5 py-1.5 text-[11px] xl:text-xs font-bold uppercase tracking-wider text-[#1a1a1a]/80 hover:text-[#FF5757] hover:bg-white rounded-full transition-all duration-150 whitespace-nowrap shadow-xs hover:shadow-xs"
+              >
+                Drops & Shop
+              </a>
+              <a
+                href="#outfit-studio"
+                className="px-3 xl:px-3.5 py-1.5 text-[11px] xl:text-xs font-bold uppercase tracking-wider text-[#1a1a1a]/80 hover:text-[#FF5757] hover:bg-white rounded-full transition-all duration-150 whitespace-nowrap shadow-xs hover:shadow-xs"
+              >
+                Outfit Studio
+              </a>
+              <a
+                href="#vault"
+                className="px-3 xl:px-3.5 py-1.5 text-[11px] xl:text-xs font-bold uppercase tracking-wider text-[#1a1a1a]/80 hover:text-[#FF5757] hover:bg-white rounded-full transition-all duration-150 whitespace-nowrap shadow-xs hover:shadow-xs"
+              >
+                VIP Vault
+              </a>
+              <button
+                onClick={onOpenDeliveryChecker}
+                className="px-3 xl:px-3.5 py-1.5 text-[11px] xl:text-xs font-bold uppercase tracking-wider text-[#1a1a1a]/80 hover:text-[#FF5757] hover:bg-white rounded-full transition-all duration-150 whitespace-nowrap cursor-pointer inline-flex items-center gap-1.5 shadow-xs hover:shadow-xs"
+              >
+                <span>10-Min Delivery</span>
+                <span className="w-1.5 h-1.5 rounded-full bg-[#FF5757] animate-pulse"></span>
+              </button>
+              <button
+                onClick={onOpenProfile}
+                className="px-3 xl:px-3.5 py-1.5 text-[11px] xl:text-xs font-bold uppercase tracking-wider text-[#1a1a1a]/80 hover:text-[#FF5757] hover:bg-white rounded-full transition-all duration-150 whitespace-nowrap cursor-pointer shadow-xs hover:shadow-xs"
+              >
+                Orders
+              </button>
+              <a
+                href="#about"
+                className="px-3 xl:px-3.5 py-1.5 text-[11px] xl:text-xs font-bold uppercase tracking-wider text-[#1a1a1a]/80 hover:text-[#FF5757] hover:bg-white rounded-full transition-all duration-150 whitespace-nowrap shadow-xs hover:shadow-xs"
+              >
+                About Us
+              </a>
+            </div>
           </div>
 
-          {/* Zone 3: Functional interactive affordances */}
-          <div className="flex items-center space-x-1.5 sm:space-x-2 md:space-x-3">
+          {/* Zone 3: Functional interactive buttons with balanced, equal spacing */}
+          <div className="flex-shrink-0 flex items-center gap-1.5 sm:gap-2 md:gap-2.5">
             {/* Search Trigger */}
             <button
               onClick={handleToggleSearch}
-              className="p-2 text-[#1a1a1a] hover:text-[#FF5757] transition-colors rounded-full hover:bg-black/5 cursor-pointer"
+              className="p-2 text-[#1a1a1a] hover:text-[#FF5757] transition-colors rounded-full hover:bg-black/5 cursor-pointer flex items-center justify-center"
               aria-label="Search items"
               title="Search Catalog"
             >
@@ -179,7 +197,7 @@ export const Header: React.FC<HeaderProps> = ({
             {/* Wishlist Button */}
             <button
               onClick={onOpenWishlist}
-              className="relative p-2 text-[#1a1a1a] hover:text-[#FF5757] transition-colors rounded-full hover:bg-black/5 cursor-pointer"
+              className="relative p-2 text-[#1a1a1a] hover:text-[#FF5757] transition-colors rounded-full hover:bg-black/5 cursor-pointer flex items-center justify-center"
               aria-label="View wishlist"
               title="Saved items"
             >
@@ -191,11 +209,11 @@ export const Header: React.FC<HeaderProps> = ({
               )}
             </button>
 
-            {/* High-Converting Auth / Sign In Trigger (Single clear button, no extra symbol) */}
+            {/* High-Converting Auth / Sign In Trigger (Single clean pill) */}
             {onOpenAuth && !currentUser && (
               <button
                 onClick={() => onOpenAuth('login')}
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-black/20 hover:border-[#FF5757] hover:text-[#FF5757] hover:bg-black/5 text-xs font-bold uppercase tracking-wider transition cursor-pointer"
+                className="inline-flex items-center gap-1.5 px-3 sm:px-3.5 py-2 rounded-full border border-black/20 hover:border-[#FF5757] hover:text-[#FF5757] hover:bg-black/5 text-xs font-bold uppercase tracking-wider transition cursor-pointer"
                 title="Sign in to your account"
               >
                 <User className="w-3.5 h-3.5" />
@@ -230,10 +248,10 @@ export const Header: React.FC<HeaderProps> = ({
             {onOpenAiSuggestions && (
               <button
                 onClick={onOpenAiSuggestions}
-                className="bg-[#111111] text-white px-3.5 py-2.5 rounded-full hover:bg-[#FF5757] transition-all duration-200 flex items-center gap-1.5 sm:gap-2 group cursor-pointer shadow-sm hover:shadow"
+                className="bg-[#111111] text-white px-3 sm:px-3.5 py-2 rounded-full hover:bg-[#FF5757] transition-all duration-200 inline-flex items-center gap-1.5 sm:gap-2 group cursor-pointer shadow-xs hover:shadow"
                 title="Open AI Suggestions & Style Concierge"
               >
-                <Sparkles className="w-4 h-4 text-[#FF5757] fill-[#FF5757] group-hover:text-white group-hover:fill-white transition-colors" />
+                <Sparkles className="w-3.5 h-3.5 text-[#FF5757] fill-[#FF5757] group-hover:text-white group-hover:fill-white transition-colors" />
                 <span className="text-xs font-bold uppercase tracking-wider hidden sm:inline">AI Suggestions</span>
                 <span className="text-xs font-bold uppercase tracking-wider sm:hidden">AI</span>
               </button>
@@ -242,7 +260,7 @@ export const Header: React.FC<HeaderProps> = ({
             {/* Cart Drawer Trigger */}
             <button
               onClick={onOpenCart}
-              className="bg-[#111111] text-white px-4 py-2.5 rounded-full hover:bg-[#FF5757] transition-all duration-200 flex items-center gap-2.5 group cursor-pointer shadow-sm hover:shadow"
+              className="bg-[#111111] text-white px-3 sm:px-4 py-2 rounded-full hover:bg-[#FF5757] transition-all duration-200 inline-flex items-center gap-2 group cursor-pointer shadow-xs hover:shadow"
               aria-label={`Shopping bag with ${cartCount} items`}
             >
               <ShoppingBag className="w-4 h-4 group-hover:scale-105 transition-transform" />
@@ -251,8 +269,89 @@ export const Header: React.FC<HeaderProps> = ({
                 {cartCount}
               </span>
             </button>
+
+            {/* Mobile Menu Toggle Button */}
+            <button
+              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+              className="lg:hidden p-2 text-[#1a1a1a] hover:text-[#FF5757] rounded-full hover:bg-black/5 transition-colors cursor-pointer flex items-center justify-center"
+              aria-label="Toggle navigation menu"
+            >
+              {isMobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+            </button>
           </div>
         </nav>
+
+        {/* Mobile Navigation Drawer for screens smaller than lg */}
+        {isMobileMenuOpen && (
+          <div className="lg:hidden border-t border-black/10 bg-[#FEFCF5] px-4 py-4 shadow-lg animate-in fade-in slide-in-from-top-2 duration-150">
+            <div className="grid grid-cols-2 gap-2 text-xs font-bold uppercase tracking-wider">
+              <a
+                href="#home"
+                onClick={() => setIsMobileMenuOpen(false)}
+                className="p-3 rounded-xl bg-black/[0.03] hover:bg-[#FF5757] hover:text-white transition-all text-center"
+              >
+                Home
+              </a>
+              <a
+                href="#categories"
+                onClick={() => setIsMobileMenuOpen(false)}
+                className="p-3 rounded-xl bg-black/[0.03] hover:bg-[#FF5757] hover:text-white transition-all text-center"
+              >
+                Categories
+              </a>
+              <a
+                href="#catalog"
+                onClick={() => {
+                  onSelectCategory('all');
+                  setIsMobileMenuOpen(false);
+                }}
+                className="p-3 rounded-xl bg-black/[0.03] hover:bg-[#FF5757] hover:text-white transition-all text-center"
+              >
+                Drops & Shop
+              </a>
+              <a
+                href="#outfit-studio"
+                onClick={() => setIsMobileMenuOpen(false)}
+                className="p-3 rounded-xl bg-black/[0.03] hover:bg-[#FF5757] hover:text-white transition-all text-center"
+              >
+                Outfit Studio
+              </a>
+              <a
+                href="#vault"
+                onClick={() => setIsMobileMenuOpen(false)}
+                className="p-3 rounded-xl bg-black/[0.03] hover:bg-[#FF5757] hover:text-white transition-all text-center"
+              >
+                VIP Vault
+              </a>
+              <button
+                onClick={() => {
+                  onOpenDeliveryChecker();
+                  setIsMobileMenuOpen(false);
+                }}
+                className="p-3 rounded-xl bg-black/[0.03] hover:bg-[#FF5757] hover:text-white transition-all text-center cursor-pointer inline-flex items-center justify-center gap-1.5"
+              >
+                <span>10-Min Delivery</span>
+                <span className="w-1.5 h-1.5 rounded-full bg-[#FF5757] animate-pulse"></span>
+              </button>
+              <button
+                onClick={() => {
+                  onOpenProfile();
+                  setIsMobileMenuOpen(false);
+                }}
+                className="p-3 rounded-xl bg-black/[0.03] hover:bg-[#FF5757] hover:text-white transition-all text-center cursor-pointer"
+              >
+                Orders
+              </button>
+              <a
+                href="#about"
+                onClick={() => setIsMobileMenuOpen(false)}
+                className="p-3 rounded-xl bg-black/[0.03] hover:bg-[#FF5757] hover:text-white transition-all text-center"
+              >
+                About Us
+              </a>
+            </div>
+          </div>
+        )}
 
         {/* Expandable Search Input Bar with Trending Searches Dropdown */}
         {showSearch && (
