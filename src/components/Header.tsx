@@ -162,12 +162,6 @@ export const Header: React.FC<HeaderProps> = ({
                 Orders
               </button>
               <a
-                href="#faq"
-                className="px-3 xl:px-3.5 py-1.5 text-[11px] xl:text-xs font-bold uppercase tracking-wider text-[#1a1a1a]/80 hover:text-[#FF5757] hover:bg-white rounded-full transition-all duration-150 whitespace-nowrap shadow-xs hover:shadow-xs"
-              >
-                FAQ
-              </a>
-              <a
                 href="#about"
                 className="px-3 xl:px-3.5 py-1.5 text-[11px] xl:text-xs font-bold uppercase tracking-wider text-[#1a1a1a]/80 hover:text-[#FF5757] hover:bg-white rounded-full transition-all duration-150 whitespace-nowrap shadow-xs hover:shadow-xs"
               >
@@ -348,13 +342,6 @@ export const Header: React.FC<HeaderProps> = ({
               >
                 Orders
               </button>
-              <a
-                href="#faq"
-                onClick={() => setIsMobileMenuOpen(false)}
-                className="p-3 rounded-xl bg-black/[0.03] hover:bg-[#FF5757] hover:text-white transition-all text-center"
-              >
-                FAQ
-              </a>
               <a
                 href="#about"
                 onClick={() => setIsMobileMenuOpen(false)}
