@@ -104,74 +104,75 @@ export const Header: React.FC<HeaderProps> = ({
       {/* TOP NAVIGATION BAR */}
       <header className="sticky top-0 w-full z-40 bg-[#FEFCF5]/90 backdrop-blur-md border-b border-black/10 transition-all duration-200">
         <nav className="w-full px-4 sm:px-6 md:px-8 py-3 flex items-center justify-between gap-3 lg:gap-6" aria-label="Main Navigation">
-          {/* Zone 1: Single text element wordmark placed at extreme left side */}
-          <div className="flex-shrink-0 flex items-center">
-            <a
-              href="#home"
-              className="text-2xl md:text-3xl font-extrabold tracking-tighter font-fashion text-[#1a1a1a] hover:opacity-90 transition select-none"
-            >
-              {brandTitle}
-            </a>
-          </div>
-
-          {/* Zone 2: Clean, equally positioned and spaced text navigation options */}
-          <div className="hidden lg:flex flex-1 items-center justify-center px-1 xl:px-4 min-w-0">
-            <div className="flex items-center justify-center gap-1 xl:gap-2 bg-black/[0.03] p-1 rounded-full border border-black/[0.06]">
+          {/* Left Block: APPARELLEX at the extreme left, followed directly by the equally-sized navigation option buttons */}
+          <div className="flex items-center gap-4 xl:gap-7 min-w-0">
+            {/* Zone 1: Single text element wordmark at the extreme left side - strictly shrink-0 to prevent any overwrite */}
+            <div className="shrink-0 flex items-center">
               <a
                 href="#home"
-                className="px-3 xl:px-3.5 py-1.5 text-[11px] xl:text-xs font-bold uppercase tracking-wider text-[#1a1a1a]/80 hover:text-[#FF5757] hover:bg-white rounded-full transition-all duration-150 whitespace-nowrap shadow-xs hover:shadow-xs"
+                className="text-2xl md:text-3xl font-extrabold tracking-tighter font-fashion text-[#1a1a1a] hover:opacity-90 transition select-none whitespace-nowrap"
+              >
+                {brandTitle}
+              </a>
+            </div>
+
+            {/* Zone 2: Following APPARELLEX, navigation option buttons fitted in equal size, position, and placement */}
+            <div className="hidden lg:flex items-center gap-1 xl:gap-1.5 bg-black/[0.03] p-1 rounded-full border border-black/[0.06] shrink-0">
+              <a
+                href="#home"
+                className="inline-flex items-center justify-center h-8 px-3 xl:px-3.5 rounded-full text-[11px] xl:text-xs font-bold uppercase tracking-wider text-[#1a1a1a]/80 hover:text-[#FF5757] hover:bg-white rounded-full transition-all duration-150 whitespace-nowrap shadow-xs hover:shadow-xs"
               >
                 Home
               </a>
               <a
                 href="#categories"
-                className="px-3 xl:px-3.5 py-1.5 text-[11px] xl:text-xs font-bold uppercase tracking-wider text-[#1a1a1a]/80 hover:text-[#FF5757] hover:bg-white rounded-full transition-all duration-150 whitespace-nowrap shadow-xs hover:shadow-xs"
+                className="inline-flex items-center justify-center h-8 px-3 xl:px-3.5 rounded-full text-[11px] xl:text-xs font-bold uppercase tracking-wider text-[#1a1a1a]/80 hover:text-[#FF5757] hover:bg-white rounded-full transition-all duration-150 whitespace-nowrap shadow-xs hover:shadow-xs"
               >
                 Categories
               </a>
               <a
                 href="#catalog"
                 onClick={() => onSelectCategory('all')}
-                className="px-3 xl:px-3.5 py-1.5 text-[11px] xl:text-xs font-bold uppercase tracking-wider text-[#1a1a1a]/80 hover:text-[#FF5757] hover:bg-white rounded-full transition-all duration-150 whitespace-nowrap shadow-xs hover:shadow-xs"
+                className="inline-flex items-center justify-center h-8 px-3 xl:px-3.5 rounded-full text-[11px] xl:text-xs font-bold uppercase tracking-wider text-[#1a1a1a]/80 hover:text-[#FF5757] hover:bg-white rounded-full transition-all duration-150 whitespace-nowrap shadow-xs hover:shadow-xs"
               >
                 Drops & Shop
               </a>
               <a
                 href="#outfit-studio"
-                className="px-3 xl:px-3.5 py-1.5 text-[11px] xl:text-xs font-bold uppercase tracking-wider text-[#1a1a1a]/80 hover:text-[#FF5757] hover:bg-white rounded-full transition-all duration-150 whitespace-nowrap shadow-xs hover:shadow-xs"
+                className="inline-flex items-center justify-center h-8 px-3 xl:px-3.5 rounded-full text-[11px] xl:text-xs font-bold uppercase tracking-wider text-[#1a1a1a]/80 hover:text-[#FF5757] hover:bg-white rounded-full transition-all duration-150 whitespace-nowrap shadow-xs hover:shadow-xs"
               >
                 Outfit Studio
               </a>
               <a
                 href="#vault"
-                className="px-3 xl:px-3.5 py-1.5 text-[11px] xl:text-xs font-bold uppercase tracking-wider text-[#1a1a1a]/80 hover:text-[#FF5757] hover:bg-white rounded-full transition-all duration-150 whitespace-nowrap shadow-xs hover:shadow-xs"
+                className="inline-flex items-center justify-center h-8 px-3 xl:px-3.5 rounded-full text-[11px] xl:text-xs font-bold uppercase tracking-wider text-[#1a1a1a]/80 hover:text-[#FF5757] hover:bg-white rounded-full transition-all duration-150 whitespace-nowrap shadow-xs hover:shadow-xs"
               >
                 VIP Vault
               </a>
               <button
                 onClick={onOpenDeliveryChecker}
-                className="px-3 xl:px-3.5 py-1.5 text-[11px] xl:text-xs font-bold uppercase tracking-wider text-[#1a1a1a]/80 hover:text-[#FF5757] hover:bg-white rounded-full transition-all duration-150 whitespace-nowrap cursor-pointer inline-flex items-center gap-1.5 shadow-xs hover:shadow-xs"
+                className="inline-flex items-center justify-center h-8 px-3 xl:px-3.5 rounded-full text-[11px] xl:text-xs font-bold uppercase tracking-wider text-[#1a1a1a]/80 hover:text-[#FF5757] hover:bg-white rounded-full transition-all duration-150 whitespace-nowrap cursor-pointer gap-1.5 shadow-xs hover:shadow-xs"
               >
                 <span>10-Min Delivery</span>
                 <span className="w-1.5 h-1.5 rounded-full bg-[#FF5757] animate-pulse"></span>
               </button>
               <button
                 onClick={onOpenProfile}
-                className="px-3 xl:px-3.5 py-1.5 text-[11px] xl:text-xs font-bold uppercase tracking-wider text-[#1a1a1a]/80 hover:text-[#FF5757] hover:bg-white rounded-full transition-all duration-150 whitespace-nowrap cursor-pointer shadow-xs hover:shadow-xs"
+                className="inline-flex items-center justify-center h-8 px-3 xl:px-3.5 rounded-full text-[11px] xl:text-xs font-bold uppercase tracking-wider text-[#1a1a1a]/80 hover:text-[#FF5757] hover:bg-white rounded-full transition-all duration-150 whitespace-nowrap cursor-pointer shadow-xs hover:shadow-xs"
               >
                 Orders
               </button>
               <a
                 href="#about"
-                className="px-3 xl:px-3.5 py-1.5 text-[11px] xl:text-xs font-bold uppercase tracking-wider text-[#1a1a1a]/80 hover:text-[#FF5757] hover:bg-white rounded-full transition-all duration-150 whitespace-nowrap shadow-xs hover:shadow-xs"
+                className="inline-flex items-center justify-center h-8 px-3 xl:px-3.5 rounded-full text-[11px] xl:text-xs font-bold uppercase tracking-wider text-[#1a1a1a]/80 hover:text-[#FF5757] hover:bg-white rounded-full transition-all duration-150 whitespace-nowrap shadow-xs hover:shadow-xs"
               >
                 About Us
               </a>
             </div>
           </div>
 
-          {/* Zone 3: Functional interactive buttons with balanced, equal spacing */}
-          <div className="flex-shrink-0 flex items-center gap-1.5 sm:gap-2 md:gap-2.5">
+          {/* Zone 3: Functional interactive buttons pushed cleanly to the right with ml-auto */}
+          <div className="shrink-0 ml-auto flex items-center gap-1.5 sm:gap-2 md:gap-2.5">
             {/* Search Trigger */}
             <button
               onClick={handleToggleSearch}
