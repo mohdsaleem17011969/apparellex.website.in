@@ -197,6 +197,11 @@ export const Footer: React.FC<FooterProps> = ({
                 </a>
               </li>
               <li>
+                <a href="#faq" className="text-white/90 hover:text-[#FF5757] font-semibold transition-colors">
+                  Frequently Asked Questions (FAQ)
+                </a>
+              </li>
+              <li>
                 <a href="#about" className="hover:text-[#FF5757] transition-colors">
                   Terms of Service & SLAs
                 </a>

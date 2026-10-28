@@ -11,6 +11,7 @@ import { CheckoutModal } from './components/CheckoutModal';
 import { DeliveryCheckerModal } from './components/DeliveryCheckerModal';
 import { WishlistModal } from './components/WishlistModal';
 import { AboutSection } from './components/AboutSection';
+import { FaqSection } from './components/FaqSection';
 import { Footer } from './components/Footer';
 import { CheckCircle2, Zap, Bike, ShieldCheck, Sparkles, Truck } from 'lucide-react';
 import { OrderDetails } from './components/OrderTracker';
@@ -641,6 +642,11 @@ function AppContent() {
         <VipDropVault onNotifyToast={showToast} />
 
         <CommunityReviews onNotifyToast={showToast} />
+
+        <FaqSection
+          onOpenDeliveryChecker={() => setIsDeliveryCheckerOpen(true)}
+          onNotifyToast={showToast}
+        />
 
         <AboutSection settings={siteSettings} />
       </main>
