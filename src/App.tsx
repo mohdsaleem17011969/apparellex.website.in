@@ -248,10 +248,21 @@ function AppContent() {
   }, [siteSettings]);
 
   useEffect(() => {
-    if (isAdminRouteRequested()) {
-      setAdminUnlocked(true);
-      setIsAdminOpen(true);
-    }
+    const handleCheckAdminRoute = () => {
+      if (isAdminRouteRequested()) {
+        setAdminUnlocked(true);
+        setIsAdminOpen(true);
+      }
+    };
+
+    handleCheckAdminRoute();
+    window.addEventListener('popstate', handleCheckAdminRoute);
+    window.addEventListener('hashchange', handleCheckAdminRoute);
+
+    return () => {
+      window.removeEventListener('popstate', handleCheckAdminRoute);
+      window.removeEventListener('hashchange', handleCheckAdminRoute);
+    };
   }, []);
 
   useEffect(() => {
@@ -634,13 +645,6 @@ function AppContent() {
         <AboutSection settings={siteSettings} />
       </main>
 
-      <button
-        onClick={handleAdminButtonClick}
-        className="fixed bottom-6 left-6 z-40 bg-[#1a1a1a] text-white px-4 py-2 text-[10px] font-bold uppercase tracking-[0.2em] rounded-sm shadow-lg hover:bg-[#FF5757] transition"
-      >
-        {adminUnlocked ? (isAdminOpen ? 'Close Admin' : 'Admin') : 'Admin'}
-      </button>
-
       {adminUnlocked && isAdminOpen && (
         <AdminPanel
           products={products}
@@ -735,6 +739,11 @@ function AppContent() {
         onReorder={handleReorderFromProfile}
         currentUser={currentUser}
         onSignOut={handleSignOut}
+        onOpenAdmin={() => {
+          setAdminUnlocked(true);
+          setIsAdminOpen(true);
+          syncAdminRoute(true);
+        }}
       />
 
       <ShareModal

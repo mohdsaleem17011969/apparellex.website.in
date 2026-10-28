@@ -47,6 +47,7 @@ interface UserProfileModalProps {
     tier?: string;
   } | null;
   onSignOut?: () => void;
+  onOpenAdmin?: () => void;
 }
 
 export const UserProfileModal: React.FC<UserProfileModalProps> = ({
@@ -58,6 +59,7 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
   onOpenFeedback,
   currentUser,
   onSignOut,
+  onOpenAdmin,
 }) => {
   if (!isOpen) return null;
 
@@ -110,6 +112,19 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
             </div>
           </div>
           <div className="flex items-center gap-2.5">
+            {currentUser?.email === 'admin@apparellex.com' && onOpenAdmin && (
+              <button
+                onClick={() => {
+                  onClose();
+                  onOpenAdmin();
+                }}
+                className="text-xs text-[#FF5757] hover:text-white bg-[#FF5757]/15 hover:bg-[#FF5757] border border-[#FF5757]/40 px-3 py-1.5 rounded transition cursor-pointer flex items-center gap-1.5 font-bold"
+                title="Open Administration Workspace"
+              >
+                <ShieldCheck className="w-3.5 h-3.5" />
+                <span>Admin Panel</span>
+              </button>
+            )}
             {onSignOut && (
               <button
                 onClick={onSignOut}
